@@ -30,4 +30,12 @@ knife4j:
   enable: true
   setting:
     language: zh_cn
+#=======================================================================================================================
+rocketmq:
+  name-server: 192.168.31.3:9876
+  producer:
+    group: meeting-producer-group
+    send-message-timeout: 3000
+    retry-times-when-send-failed: 2
+
 
