@@ -1,165 +1,198 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch, computed, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Microphone, VideoCamera, PhoneFilled } from '@element-plus/icons-vue'
+import {
+  Microphone,
+  VideoCamera,
+  PhoneFilled,
+  Monitor,
+  ChatDotRound,
+} from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
 import { MeetingApi } from '@/api'
-import { useWebRTC } from '@/composables/useWebRTC'
+import { useWebRTC } from '@/utils/rtc'
 import VideoTile from '@/components/VideoTile.vue'
-import { createMediaStream } from '@/utils/track'
-import { lo } from 'element-plus/es/locales.mjs'
-
+import ChatPanel from '@/components/ChatPanel.vue'
+import { getCameraStream, getScreenStream } from '@/utils/track'
+import { wsManager } from '@/utils/websocket'
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
 
-// 本地媒体流
-const localStream = ref<MediaStream>(createMediaStream())
+// Stream
+const stream = ref<MediaStream>()
 const isAudioEnabled = ref(true)
 const isVideoEnabled = ref(true)
+const isScreenSharing = ref(false)
+const isChatOpen = ref(false)
+const { localMap, cleanup, createRTC, setStream } = useWebRTC()
 
-// 使用 WebRTC composable
-const {
-  localMap,
-  createPeerConnection,
-  registerMessageHandlers,
-  unregisterMessageHandlers,
-  closeAllConnections,
-} = useWebRTC(localStream)
+// Maximize video state
+const maximizedUserId = ref<string | null>(null)
 
 const memberList = computed(() => {
   return Array.from(localMap.values())
 })
 
-// 切换音频
+// Toggle maximize video
+const toggleMaximize = (userId: string) => {
+  if (maximizedUserId.value === userId) {
+    maximizedUserId.value = null
+  } else {
+    maximizedUserId.value = userId
+  }
+}
+
+// Check if video is maximized
+const isMaximized = (userId: string) => {
+  return maximizedUserId.value === userId
+}
+
+// Switch audio
 const toggleAudio = () => {
-  if (localStream.value) {
-    const audioTracks = localStream.value.getAudioTracks()
+  if (stream.value) {
+    const audioTracks = stream.value.getAudioTracks()
     audioTracks.forEach((track) => {
       track.enabled = !track.enabled
     })
     isAudioEnabled.value = !isAudioEnabled.value
-    ElMessage.info(isAudioEnabled.value ? '麦克风已开启' : '麦克风已关闭')
   }
 }
 
-// 切换视频
+// Switch video
 const toggleVideo = () => {
-  if (localStream.value) {
-    const videoTracks = localStream.value.getVideoTracks()
+  if (stream.value) {
+    const videoTracks = stream.value.getVideoTracks()
     videoTracks.forEach((track) => {
       track.enabled = !track.enabled
     })
     isVideoEnabled.value = !isVideoEnabled.value
-    ElMessage.info(isVideoEnabled.value ? '摄像头已开启' : '摄像头已关闭')
   }
 }
 
-// 离开会议
+// Toggle screen sharing
+const toggleScreenSharing = async () => {
+  if (isScreenSharing.value) {
+    stream.value?.getTracks().forEach((track) => track.stop())
+    isScreenSharing.value = false
+    stream.value = await getCameraStream()
+  } else {
+    startScreenSharing()
+  }
+}
+
+// Leave meeting
 const leaveMeeting = () => {
-  ElMessage.success('已离开会议')
   router.push('/dashboard')
 }
 
-// 加入会议
+// Toggle chat panel
+const toggleChat = () => {
+  isChatOpen.value = !isChatOpen.value
+}
+
+// Join meeting
 const joinMeeting = async () => {
   try {
     const meetingIdParam = route.params.id as string
     const password = (route.query.pwd as string) || ''
 
     if (!meetingIdParam) {
-      ElMessage.error('会议ID不存在')
+      ElMessage.error('Meeting ID does not exist')
       router.push('/dashboard')
       return
     }
 
-    // 调用加入会议 API
+    // Call join meeting API
     const res = await MeetingApi.joinMeeting({
       meetingId: Number(meetingIdParam),
       password,
-      nickName: userStore.userInfo?.nickName || '匿名用户',
+      nickName: userStore.userInfo?.nickName || 'Anonymous',
     })
 
-    // 为每个已存在的参与者创建连接
+    // Create connections for each existing participant
     res.data.forEach((userId) => {
       if (userId !== userStore.userInfo!.userId) {
-        createPeerConnection(userId)
+        createRTC(userId)
       }
     })
+  } catch (error: unknown) {
+    throw new Error('Join meeting failed')
+  }
+}
 
-    console.log('Successfully joined meeting:', meetingIdParam)
-  } catch (error: any) {
-    console.error('Failed to join meeting:', error)
-    ElMessage.error(error?.message || '加入会议失败')
+const startScreenSharing = async () => {
+  try {
+    const screenStream = await getScreenStream()
+    isScreenSharing.value = true
+    stream.value?.getTracks().forEach((track) => track.stop())
+    stream.value = screenStream
+  } catch (e) {
+    ElMessage.error('Getting screen stream failed')
+  }
+}
+
+watchEffect(() => {
+  if (stream.value) setStream(stream.value)
+})
+
+onMounted(async () => {
+  try {
+    stream.value = await getCameraStream()
+    await wsManager.waitForConnection()
+    await joinMeeting()
+  } catch (e: any) {
+    ElMessage.error((e as Error).message)
     setTimeout(() => {
       router.push('/dashboard')
     }, 2000)
   }
-}
-
-onMounted(async () => {
-  try {
-    try {
-      // localStream.value = await navigator.mediaDevices.getUserMedia({
-      //   video: {
-      //     width: { ideal: 1280 },
-      //     height: { ideal: 720 },
-      //   },
-      //   audio: {
-      //     echoCancellation: true,
-      //     noiseSuppression: true,
-      //   },
-      // })
-    } catch (e) {}
-    registerMessageHandlers()
-    await joinMeeting()
-  } catch (error) {
-    console.error('Failed to initialize meeting room:', error)
-  }
 })
 
-// 组件卸载清理
-onBeforeUnmount(() => {
-  closeAllConnections()
-  localStream.value?.getTracks().forEach((track) => {
-    track.stop()
-  })
-  unregisterMessageHandlers()
-})
+onBeforeUnmount(cleanup)
 </script>
 
 <template>
   <div class="meeting-room-shell">
-    <!-- 视频区域 -->
-    <div class="video-area">
-      <div class="main-video-container">
-        <!-- 本地视频 -->
+    <!-- VIDEO AREA -->
+    <div class="video-area" :class="{ 'chat-open': isChatOpen }">
+      <div class="main-video-container" :class="{ 'has-maximized': maximizedUserId !== null }">
+        <!-- LOCAL VIDEO -->
         <VideoTile
           :user-id="userStore.userInfo?.userId || ''"
           :nick-name="userStore.userInfo?.nickName"
-          v-model:stream="localStream"
+          v-model:stream="stream"
           :is-local="true"
           :is-audio-enabled="isAudioEnabled"
           :is-video-enabled="isVideoEnabled"
+          :is-maximized="isMaximized(userStore.userInfo?.userId || '')"
+          @click="toggleMaximize(userStore.userInfo?.userId || '')"
         />
 
-        <!-- 远程参与者视频 -->
+        <!-- REMOTE PARTICIPANT VIDEO -->
         <VideoTile
           v-for="participant in memberList"
           :key="participant.userId"
           :user-id="participant.userId"
-          :nick-name="participant.nickName"
+          :nick-name="undefined"
           :stream="participant.stream"
           :is-local="false"
+          :is-maximized="isMaximized(participant.userId)"
+          @click="toggleMaximize(participant.userId)"
         />
       </div>
     </div>
 
-    <!-- 控制栏 -->
+    <!-- CHAT PANEL -->
+    <div class="chat-sidebar" :class="{ open: isChatOpen }">
+      <ChatPanel />
+    </div>
+
+    <!-- CONTROL BAR -->
     <div class="control-bar">
       <div class="control-buttons">
-        <!-- 麦克风 -->
+        <!-- MICROPHONE -->
         <el-button
           :type="isAudioEnabled ? 'primary' : 'danger'"
           circle
@@ -171,7 +204,7 @@ onBeforeUnmount(() => {
           </el-icon>
         </el-button>
 
-        <!-- 摄像头 -->
+        <!-- CAMERA -->
         <el-button
           :type="isVideoEnabled ? 'primary' : 'danger'"
           circle
@@ -183,7 +216,26 @@ onBeforeUnmount(() => {
           </el-icon>
         </el-button>
 
-        <!-- 离开会议 -->
+        <!-- SCREEN SHARING -->
+        <el-button
+          :type="isScreenSharing ? 'success' : 'info'"
+          circle
+          size="large"
+          @click="toggleScreenSharing"
+        >
+          <el-icon :size="24">
+            <Monitor />
+          </el-icon>
+        </el-button>
+
+        <!-- CHAT -->
+        <el-button :type="isChatOpen ? 'success' : 'info'" circle size="large" @click="toggleChat">
+          <el-icon :size="24">
+            <ChatDotRound />
+          </el-icon>
+        </el-button>
+
+        <!-- LEAVE MEETING -->
         <el-button type="danger" circle size="large" @click="leaveMeeting">
           <el-icon :size="24">
             <PhoneFilled />
@@ -191,10 +243,10 @@ onBeforeUnmount(() => {
         </el-button>
       </div>
 
-      <!-- 会议信息 -->
+      <!-- MEETING INFO -->
       <div class="meeting-info">
-        <span>会议 ID: {{ route.params.id }}</span>
-        <span>参与者: {{ memberList.length + 1 }}</span>
+        <span>Meeting ID: {{ route.params.id }}</span>
+        <span>Participants: {{ memberList.length + 1 }}</span>
       </div>
     </div>
   </div>
@@ -213,25 +265,52 @@ onBeforeUnmount(() => {
   .video-area {
     flex: 1;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    overflow: auto;
+    overflow-y: hidden;
+    transition: margin-right 0.3s ease;
+
+    &.chat-open {
+      margin-right: 360px;
+    }
 
     .main-video-container {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      grid-auto-rows: minmax(200px, auto);
       gap: 16px;
       width: 100%;
-      max-width: 1400px;
+      padding: 20px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      align-content: start;
+      position: relative;
+      transition: all 0.3s ease;
+
+      &.has-maximized {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+  }
+
+  .chat-sidebar {
+    position: fixed;
+    right: -360px;
+    top: 0;
+    bottom: 0;
+    width: 360px;
+    background: #1e1e1e;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    transition: right 0.3s ease;
+    z-index: 100;
+
+    &.open {
+      right: 0;
     }
   }
 
   .control-bar {
     position: relative;
-    bottom: 0;
-    left: 0;
-    right: 0;
     background: rgba(30, 30, 30, 0.95);
     backdrop-filter: blur(10px);
     padding: 20px;

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
-import { watch, onMounted } from 'vue'
+import { watch, onMounted, watchEffect } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { wsManager } from '@/utils/websocket'
 import { lo } from 'element-plus/es/locales.mjs'
@@ -8,29 +8,31 @@ import { UserApi } from './api'
 
 const userStore = useUserStore()
 
-onMounted(async () => {
-  const token = localStorage.getItem('token')
-
-  if (token) {
-    if (!token) {
-      console.warn('[App] No token found, skipping WebSocket connection')
-      return
-    }
-    const res = await UserApi.me()
-    userStore.setUserInfo(res.data)
-    try {
-      await wsManager.connect({
+watchEffect(() => {
+  const userInfo = userStore.userInfo
+  if (!userInfo) wsManager.disconnect()
+  else {
+    const token = localStorage.getItem('token')
+    if (token) {
+      wsManager.connect({
         token,
         hostname: window.location.hostname,
         port: 8089,
       })
-      console.log('[App] WebSocket connected successfully')
-    } catch (error) {
-      console.error('[App] Failed to connect WebSocket:', error)
     }
-  } else {
-    console.log('[App] User info cleared, disconnecting WebSocket...')
-    wsManager.disconnect()
+  }
+})
+
+onMounted(async () => {
+  const token = localStorage.getItem('token')
+  if (token) {
+    const res = await UserApi.me()
+    userStore.setUserInfo(res.data)
+    await wsManager.connect({
+      token,
+      hostname: window.location.hostname,
+      port: 8089,
+    })
   }
 })
 </script>

@@ -11,51 +11,42 @@ const joinMeetingId = ref('')
 const joinPassword = ref('')
 const loading = ref(false)
 
-// 打开加入会议对话框
 const handleClick = () => {
   showJoinDialog.value = true
 }
 
-// 确认加入会议
 const confirmJoinMeeting = async () => {
   if (!joinMeetingId.value.trim()) {
-    ElMessage.warning('请输入会议ID')
+    ElMessage.warning('Please enter the meeting ID')
     return
   }
 
   loading.value = true
   try {
-    // 1. 预加入验证
     await MeetingApi.preJoinMeeting({
       meetingId: Number(joinMeetingId.value),
       password: joinPassword.value,
     })
 
-    // 2. 验证成功，跳转到会议室（真正的加入会在 MeetingRoom 组件中完成）
     const meetingId = joinMeetingId.value
     const password = joinPassword.value
 
-    // 重置表单
     joinMeetingId.value = ''
     joinPassword.value = ''
     showJoinDialog.value = false
 
-    ElMessage.success('正在加入会议...')
-
-    // 通过 query 参数传递密码（如果需要）
     router.push({
       path: `/meeting/${meetingId}`,
       query: password ? { pwd: password } : undefined,
     })
   } catch (error: any) {
     console.error('Pre-join meeting failed:', error)
-    ElMessage.error(error?.message || '会议验证失败')
+    ElMessage.error(error?.message || 'Meeting validation failed')
   } finally {
     loading.value = false
   }
 }
 
-// 取消
 const handleCancel = () => {
   joinMeetingId.value = ''
   joinPassword.value = ''
@@ -69,28 +60,28 @@ const handleCancel = () => {
       <div class="btn-icon">
         <el-icon><Plus /></el-icon>
       </div>
-      <span class="btn-text">加入会议</span>
+      <span class="btn-text">JOIN MEETING</span>
     </div>
 
-    <!-- 加入会议对话框 -->
+    <!-- JOIN MEETING DIALOG -->
     <el-dialog
       v-model="showJoinDialog"
-      title="加入会议"
+      title="JOIN MEETING"
       width="450px"
       :close-on-click-modal="false"
     >
       <div class="join-meeting-content">
-        <p class="dialog-desc">请输入会议ID或个人链接名称</p>
+        <p class="dialog-desc">Please enter the meeting ID or personal link name</p>
         <el-input
           v-model="joinMeetingId"
-          placeholder="请输入会议ID"
+          placeholder="Please enter the meeting ID"
           size="large"
           class="input-field"
           @keyup.enter="confirmJoinMeeting"
         />
         <el-input
           v-model="joinPassword"
-          placeholder="请输入会议密码（选填）"
+          placeholder="Please enter the meeting password (optional)"
           size="large"
           class="input-field"
           type="password"
@@ -99,8 +90,8 @@ const handleCancel = () => {
         />
       </div>
       <template #footer>
-        <el-button @click="handleCancel" :disabled="loading">取消</el-button>
-        <el-button type="primary" @click="confirmJoinMeeting" :loading="loading"> 加入 </el-button>
+        <el-button @click="handleCancel" :disabled="loading">Cancel</el-button>
+        <el-button type="primary" @click="confirmJoinMeeting" :loading="loading">Join</el-button>
       </template>
     </el-dialog>
   </div>

@@ -1,54 +1,42 @@
 <script setup lang="ts">
-import { ref, watchEffect, computed, onMounted, watch, nextTick } from 'vue'
-import { Microphone, VideoCamera } from '@element-plus/icons-vue'
-import { createMediaStream } from '@/utils/track'
+import { ref, watchEffect, computed } from 'vue'
 
 const videoShellRef = ref<HTMLVideoElement>()
 const userId = defineModel<string>('userId')
 const nickName = defineModel<string | undefined>('nickName')
 const stream = defineModel<MediaStream | undefined>('stream')
 const isLocal = defineModel<boolean>('isLocal', { default: false })
-const isAudioEnabled = defineModel<boolean>('isAudioEnabled', { default: true })
-const isVideoEnabled = defineModel<boolean>('isVideoEnabled', { default: true })
+const isMaximized = defineModel<boolean>('isMaximized', { default: false })
 
 const displayName = computed(() => {
-  if (isLocal.value) return `${nickName.value || '我'} (我)`
+  if (isLocal.value) return `${nickName.value || 'ME'} (ME)`
   return nickName.value || userId.value
 })
 
-const createVideo = async (stream: MediaStream) => {
-  if (!videoShellRef.value) return
-  const existingVideo = videoShellRef.value.querySelector('video')
-  if (existingVideo) videoShellRef.value.removeChild(existingVideo)
-
-  const video = document.createElement('video')
-  video.muted = true
-  video.autoplay = true
-  video.srcObject = stream
-  video.play()
-  videoShellRef.value.appendChild(video)
-}
-
 watchEffect(async () => {
   const currentStream = stream.value
-  const videoElement = videoShellRef.value
-  if (currentStream && videoElement) await createVideo(currentStream)
+  const videoShell = videoShellRef.value
+  if (currentStream && videoShell) {
+    const existingVideo = videoShell.querySelector('video')
+    if (existingVideo) videoShell.removeChild(existingVideo)
+    const video = document.createElement('video')
+    video.muted = true
+    video.autoplay = true
+    video.srcObject = currentStream
+    video.play()
+    videoShell.appendChild(video)
+  }
 })
 </script>
 
 <template>
-  <div class="video-tile" :class="{ 'local-video': isLocal }">
+  <div class="video-tile" :class="{ 'local-video': isLocal, maximized: isMaximized }">
+    <div class="stream-info">{{ stream }}</div>
     <div class="video-shell" ref="videoShellRef"></div>
     <div class="video-info">
       <span class="name">{{ displayName }}</span>
-      <div class="status-icons">
-        <el-icon v-if="!isAudioEnabled" class="status-icon muted">
-          <Microphone />
-        </el-icon>
-        <el-icon v-if="!isVideoEnabled" class="status-icon video-off">
-          <VideoCamera />
-        </el-icon>
-      </div>
+      <span class="maximize-hint" v-if="!isMaximized">Click to Maximize</span>
+      <span class="maximize-hint" v-else>Click to Restore</span>
     </div>
   </div>
 </template>
@@ -57,25 +45,62 @@ watchEffect(async () => {
 .video-tile {
   background-color: #2c2c2c;
   position: relative;
+  width: 100%;
   aspect-ratio: 16 / 9;
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 0;
+  cursor: pointer;
 
   &:hover {
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    transform: scale(1.02);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+    .maximize-hint {
+      opacity: 1;
+    }
+  }
+
+  &.maximized {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 100;
+    border: none !important;
+    border-radius: 0;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+    animation: maximizeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:hover {
+      transform: none;
+    }
+  }
+
+  .stream-info {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    color: #fff;
+    font-size: 12px;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 2px 6px;
+    border-radius: 4px;
+    z-index: 10;
   }
 
   .video-shell {
+    display: flex;
     width: 100%;
     height: 100%;
-    object-fit: cover;
     background-color: #aac1c3;
+    justify-content: center;
     video {
-      width: 100%;
-      height: 100%;
       object-fit: cover;
+      flex: 1;
     }
   }
 
@@ -91,6 +116,7 @@ watchEffect(async () => {
     background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(4px);
     border-radius: 6px;
+    transition: all 0.3s ease;
 
     .name {
       color: #fff;
@@ -101,28 +127,30 @@ watchEffect(async () => {
       white-space: nowrap;
     }
 
-    .status-icons {
-      display: flex;
-      gap: 8px;
-      flex-shrink: 0;
-
-      .status-icon {
-        color: #ff4d4f;
-        font-size: 18px;
-
-        &.muted {
-          color: #ff4d4f;
-        }
-
-        &.video-off {
-          color: #faad14;
-        }
-      }
+    .maximize-hint {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 12px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      background: rgba(64, 158, 255, 0.3);
+      padding: 2px 8px;
+      border-radius: 4px;
     }
   }
 
   &.local-video {
     border: 2px solid #409eff;
+  }
+}
+
+@keyframes maximizeIn {
+  from {
+    opacity: 0.8;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 </style>

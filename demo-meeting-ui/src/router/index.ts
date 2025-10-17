@@ -29,7 +29,7 @@ const router = createRouter({
   ],
 })
 
-// 路由守卫
+// Route guard
 router.beforeEach(async (to, from, next) => {
   next()
 })

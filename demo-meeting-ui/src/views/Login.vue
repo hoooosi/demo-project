@@ -9,21 +9,15 @@ import { useUserStore } from '@/stores/user'
 const router = useRouter()
 const userStore = useUserStore()
 
-// 表单状态
 const isLogin = ref(true)
 const loading = ref(false)
 const checkCodeLoading = ref(false)
 
-// 验证码信息
-const checkCodeInfo = ref<VO.CheckCodeVO | null>(null)
-
-// 登录表单数据
+const checkCodeInfo = ref<VO.CheckCodeVO>()
 const loginForm = reactive<DTO.LoginDTO>({
   email: 'testemail@qq.com',
   password: '12345678',
 })
-
-// 注册表单数据
 const registerForm = reactive<DTO.RegisterDTO>({
   email: 'testemail@qq.com',
   password: '12345678',
@@ -32,7 +26,6 @@ const registerForm = reactive<DTO.RegisterDTO>({
   checkCodeKey: '',
 })
 
-// 登录表单验证规则
 const loginRules = {
   email: [
     { required: true, message: '请输入邮箱', trigger: 'blur' },
@@ -44,7 +37,6 @@ const loginRules = {
   ],
 }
 
-// 注册表单验证规则
 const registerRules = {
   email: [
     { required: true, message: '请输入邮箱', trigger: 'blur' },
@@ -64,10 +56,8 @@ const registerRules = {
 const loginFormRef = ref()
 const registerFormRef = ref()
 
-// 切换登录/注册模式
 const toggleMode = () => {
   isLogin.value = !isLogin.value
-  // 清空表单
   if (loginFormRef.value) {
     loginFormRef.value.resetFields()
   }
@@ -76,7 +66,6 @@ const toggleMode = () => {
   }
 }
 
-// 登录处理
 const handleLogin = async () => {
   if (!loginFormRef.value) return
 
@@ -86,25 +75,18 @@ const handleLogin = async () => {
   loading.value = true
   try {
     const result = await UserApi.login(loginForm)
-    // 保存token
     localStorage.setItem('token', result.data)
-
-    // 获取用户信息
     const userInfo = await UserApi.me()
     userStore.setUserInfo(userInfo.data)
-
-    ElMessage.success('登录成功!')
-
-    // 跳转到Dashboard
+    ElMessage.success('Login successful!')
     router.push('/dashboard')
-  } catch (error: any) {
-    ElMessage.error(error.message || '登录失败')
+  } catch (e: any) {
+    ElMessage.error(e.message || 'Login failed')
   } finally {
     loading.value = false
   }
 }
 
-// 注册处理
 const handleRegister = async () => {
   if (!registerFormRef.value) return
 
@@ -114,36 +96,35 @@ const handleRegister = async () => {
   loading.value = true
   try {
     await UserApi.register(registerForm)
-    ElMessage.success('注册成功!')
-    isLogin.value = true // 注册成功后切换到登录模式
+    ElMessage.success('Registration successful!')
+    isLogin.value = true
   } catch (error: any) {
-    ElMessage.error(error.message || '注册失败')
+    ElMessage.error(error.message || 'Registration failed')
   } finally {
     loading.value = false
   }
 }
 
-// 获取验证码
+// Get check code
 const getCheckCode = async () => {
   checkCodeLoading.value = true
   try {
     const result = await UserApi.checkCode()
     checkCodeInfo.value = result.data
     registerForm.checkCodeKey = result.data.key
-    ElMessage.success('验证码获取成功')
   } catch (error: any) {
-    ElMessage.error(error.message || '获取验证码失败')
+    ElMessage.error(error.message || 'Getting check code failed')
   } finally {
     checkCodeLoading.value = false
   }
 }
 
-// 刷新验证码
+// Refresh check code
 const refreshCheckCode = () => {
   getCheckCode()
 }
 
-// 检查登录状态
+// Check login status
 const checkLoginStatus = async () => {
   const token = localStorage.getItem('token')
   if (token) {
@@ -158,7 +139,6 @@ const checkLoginStatus = async () => {
   }
 }
 
-// 组件挂载时获取验证码和检查登录状态
 onMounted(() => {
   checkLoginStatus()
   getCheckCode()
@@ -170,12 +150,12 @@ onMounted(() => {
     <div class="login-container">
       <div class="login-card">
         <div class="login-header">
-          <h1 class="login-title">{{ isLogin ? '登录' : '注册' }}</h1>
-          <p class="login-subtitle">欢迎使用会议系统</p>
+          <h1 class="login-title">{{ isLogin ? 'Login' : 'Register' }}</h1>
+          <p class="login-subtitle">Welcome to the Meeting System</p>
         </div>
 
         <div class="login-form-wrapper">
-          <!-- 登录表单 -->
+          <!-- LOGIN FORM -->
           <el-form
             v-if="isLogin"
             ref="loginFormRef"
@@ -186,7 +166,7 @@ onMounted(() => {
             <el-form-item prop="email" class="form-item">
               <el-input
                 v-model="loginForm.email"
-                placeholder="请输入邮箱"
+                placeholder="Please enter your email"
                 :prefix-icon="Message"
                 size="large"
                 class="form-input"
@@ -197,7 +177,7 @@ onMounted(() => {
               <el-input
                 v-model="loginForm.password"
                 type="password"
-                placeholder="请输入密码"
+                placeholder="Please enter your password"
                 :prefix-icon="Lock"
                 size="large"
                 show-password
@@ -213,12 +193,12 @@ onMounted(() => {
                 @click="handleLogin"
                 class="submit-button"
               >
-                {{ loading ? '登录中...' : '登录' }}
+                {{ loading ? 'Logging in...' : 'Login' }}
               </el-button>
             </el-form-item>
           </el-form>
 
-          <!-- 注册表单 -->
+          <!-- REGISTER FORM -->
           <el-form
             v-else
             ref="registerFormRef"
@@ -229,7 +209,7 @@ onMounted(() => {
             <el-form-item prop="email" class="form-item">
               <el-input
                 v-model="registerForm.email"
-                placeholder="请输入邮箱"
+                placeholder="Please enter your email"
                 :prefix-icon="Message"
                 size="large"
                 class="form-input"
@@ -239,7 +219,7 @@ onMounted(() => {
             <el-form-item prop="nickName" class="form-item">
               <el-input
                 v-model="registerForm.nickName"
-                placeholder="请输入昵称"
+                placeholder="Please enter your nickname"
                 :prefix-icon="User"
                 size="large"
                 class="form-input"
@@ -250,7 +230,7 @@ onMounted(() => {
               <el-input
                 v-model="registerForm.password"
                 type="password"
-                placeholder="请输入密码"
+                placeholder="Please enter your password"
                 :prefix-icon="Lock"
                 size="large"
                 show-password
@@ -261,7 +241,7 @@ onMounted(() => {
               <div class="check-code-wrapper">
                 <el-input
                   v-model="registerForm.checkCode"
-                  placeholder="请输入验证码"
+                  placeholder="Please enter the verification code"
                   size="large"
                   class="check-code-input"
                 />
@@ -269,7 +249,7 @@ onMounted(() => {
                   <img
                     v-if="checkCodeInfo"
                     :src="checkCodeInfo.base64"
-                    alt="验证码"
+                    alt="Verification Code"
                     class="check-code-image"
                     @click="refreshCheckCode"
                   />
@@ -277,7 +257,7 @@ onMounted(() => {
                     <el-icon v-if="checkCodeLoading" class="is-loading">
                       <Loading />
                     </el-icon>
-                    <span v-else>点击获取</span>
+                    <span v-else>Click to get</span>
                   </div>
                 </div>
               </div>
@@ -291,7 +271,7 @@ onMounted(() => {
                 @click="handleRegister"
                 class="submit-button"
               >
-                {{ loading ? '注册中...' : '注册' }}
+                {{ loading ? 'Registering...' : 'Register' }}
               </el-button>
             </el-form-item>
           </el-form>
@@ -299,9 +279,9 @@ onMounted(() => {
 
         <div class="login-footer">
           <p class="toggle-text">
-            {{ isLogin ? '还没有账号？' : '已有账号？' }}
+            {{ isLogin ? "Don't have an account?" : 'Already have an account?' }}
             <el-button type="text" @click="toggleMode" class="toggle-button">
-              {{ isLogin ? '立即注册' : '立即登录' }}
+              {{ isLogin ? 'Register now' : 'Login now' }}
             </el-button>
           </p>
         </div>
@@ -526,86 +506,12 @@ onMounted(() => {
     }
   }
 }
-
-// 动画
 @keyframes rotate {
   from {
     transform: rotate(0deg);
   }
   to {
     transform: rotate(360deg);
-  }
-}
-
-// 响应式设计
-@media (max-width: 480px) {
-  .login-shell {
-    .login-container {
-      max-width: 100%;
-      padding: 16px;
-
-      .login-card {
-        border-radius: 20px;
-
-        .login-header {
-          padding: 40px 32px 24px;
-
-          .login-title {
-            font-size: 28px;
-          }
-
-          .login-subtitle {
-            font-size: 14px;
-          }
-        }
-
-        .login-form-wrapper {
-          padding: 0 32px 24px;
-
-          .login-form,
-          .register-form {
-            .form-item {
-              margin-bottom: 24px;
-
-              .form-input {
-                :deep(.el-input__wrapper) {
-                  height: 52px;
-                  padding: 0 20px;
-                }
-              }
-
-              .check-code-wrapper {
-                flex-direction: column;
-                gap: 12px;
-
-                .check-code-input {
-                  :deep(.el-input__wrapper) {
-                    height: 52px;
-                    padding: 0 20px;
-                  }
-                }
-
-                .check-code-image-wrapper {
-                  width: 100%;
-                  height: 52px;
-                }
-              }
-
-              &.form-submit {
-                .submit-button {
-                  height: 52px;
-                  font-size: 15px;
-                }
-              }
-            }
-          }
-        }
-
-        .login-footer {
-          padding: 20px 32px 40px;
-        }
-      }
-    }
   }
 }
 </style>

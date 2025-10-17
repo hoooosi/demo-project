@@ -1,4 +1,4 @@
-// WebSocket Worker 消息类型
+// WebSocket Worker Message Types
 export enum WorkerMessageType {
     // Worker -> Main
     CONNECTED = 'connected',
@@ -12,41 +12,40 @@ export enum WorkerMessageType {
     SEND = 'send',
 }
 
-// 消息目标类型（对应后端）
+// Message target types (corresponding to backend)
 export enum MessageTargetType {
     SINGLE = 1,
     MEETING = 2
 }
 
-// 消息类型（对应后端）
+// Message types (corresponding to backend)
 export enum MessageType {
     TEXT = 1,
     IMAGE = 2,
     FILE = 3,
     AUDIO = 4,
     VIDEO = 5,
-    OFFER = 11,
-    ANSWER = 12,
-    ICE_CANDIDATE = 13
+
+    SIGNAL = 98,
 }
 
-// Worker 消息接口
+// Worker message interface
 export interface WorkerMessage {
     type: WorkerMessageType
     payload?: any
 }
 
-// WebSocket 消息接口
+// WebSocket message interface
 export interface WSMessage {
     messageType: MessageType
     messageTargetType: MessageTargetType
-    senderId?: string
-    receiverId?: string
+    senderId: string
+    receiverId: string
     content: any
-    sendTime?: string
+    sendTime: string
 }
 
-// 连接配置
+// Connection configuration
 export interface WSConnectConfig {
     url: string
     token: string
@@ -55,7 +54,7 @@ export interface WSConnectConfig {
     heartbeatInterval?: number
 }
 
-// 连接状态
+// Connection state
 export enum ConnectionState {
     CONNECTING = 'connecting',
     CONNECTED = 'connected',

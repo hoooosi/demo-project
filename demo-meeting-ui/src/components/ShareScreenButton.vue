@@ -11,7 +11,7 @@ defineProps<{
     <div class="btn-icon">
       <el-icon><Monitor /></el-icon>
     </div>
-    <span class="btn-text">共享屏幕</span>
+    <span class="btn-text">SHARE SCREEN</span>
   </div>
 </template>
 

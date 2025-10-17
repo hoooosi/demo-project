@@ -24,43 +24,41 @@ import ShareScreenButton from '@/components/ShareScreenButton.vue'
 const router = useRouter()
 const userStore = useUserStore()
 
-// 当前日期信息
 const currentDate = ref('')
 const currentWeekday = ref('')
 
-// 初始化日期
 const initDate = () => {
   const now = new Date()
   const month = now.getMonth() + 1
   const date = now.getDate()
-  currentDate.value = `${month}月${date}日`
+  currentDate.value = `${month}Month${date}Day`
 
-  const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+  const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
   const dayIndex = now.getDay()
-  currentWeekday.value = `周${['一', '二', '三', '四', '五', '六', '日'][dayIndex]}`
+  currentWeekday.value = `Weekday ${weekdays[dayIndex]}`
 }
 
-// 用户信息弹窗
+// User information dialog
 const showUserDialog = ref(false)
 
-// 检查用户状态
+// Check user status
 const checkUserStatus = async () => {
   try {
     const result = await UserApi.me()
     userStore.setUserInfo(result.data)
   } catch (error) {
-    ElMessage.error('请先登录')
+    ElMessage.error('Please log in first')
     router.push('/login')
   }
 }
 
-// 操作按钮事件
+// Operation button events
 const handleScheduleMeeting = () => {
-  ElMessage.info('预定会议功能开发中...')
+  ElMessage.info('Schedule meeting feature is under development...')
 }
 
 const handleShareScreen = () => {
-  ElMessage.info('共享屏幕功能开发中...')
+  ElMessage.info('Screen sharing feature is under development...')
 }
 
 const showUserInfo = () => {
@@ -70,7 +68,7 @@ const showUserInfo = () => {
 const logout = () => {
   userStore.clearUserInfo()
   router.push('/login')
-  ElMessage.success('已退出登录')
+  ElMessage.success('Logged out successfully')
 }
 
 const showBanner = ref(true)
@@ -84,9 +82,9 @@ onMounted(async () => {
 <template>
   <div class="dashboard-shell">
     <div class="dashboard-container">
-      <!-- 区域1: 侧边栏 -->
+      <!-- Sidebar Section -->
       <div class="sidebar-section">
-        <!-- 头像区域 -->
+        <!-- Avatar Area -->
         <div class="avatar-area">
           <div class="avatar-wrapper">
             <div class="avatar">
@@ -97,29 +95,29 @@ onMounted(async () => {
           </div>
         </div>
 
-        <!-- 主菜单 -->
+        <!-- Main Menu -->
         <div class="main-menu">
           <div class="menu-item active">
             <div class="menu-icon">
               <el-icon><VideoCamera /></el-icon>
             </div>
-            <span class="menu-text">会议</span>
+            <span class="menu-text">Meeting</span>
           </div>
           <div class="menu-item">
             <div class="menu-icon">
               <el-icon><ChatLineSquare /></el-icon>
             </div>
-            <span class="menu-text">通讯录</span>
+            <span class="menu-text">Contacts</span>
           </div>
           <div class="menu-item">
             <div class="menu-icon">
               <el-icon><VideoPlay /></el-icon>
             </div>
-            <span class="menu-text">录制</span>
+            <span class="menu-text">Recording</span>
           </div>
         </div>
 
-        <!-- 底部菜单 -->
+        <!-- Bottom Menu -->
         <div class="bottom-menu">
           <div class="menu-item">
             <el-icon><Message /></el-icon>
@@ -135,7 +133,7 @@ onMounted(async () => {
         </div>
       </div>
 
-      <!-- 区域2: 操作区 -->
+      <!-- Operation Section -->
       <div class="opt-section">
         <div class="action-buttons">
           <JoinMeetingButton />
@@ -145,56 +143,56 @@ onMounted(async () => {
         </div>
       </div>
 
-      <!-- 区域3: 信息区 -->
+      <!-- Information Section -->
       <div class="info-section">
-        <!-- 日期区域 -->
+        <!-- Date Area -->
         <div class="date-area">
           <div class="date-display">
             <h1 class="date-text">{{ currentDate }}</h1>
             <p class="weekday-text">{{ currentWeekday }}</p>
           </div>
           <div class="all-meetings-link">
-            <span>全部会议</span>
+            <span>All Meetings</span>
             <el-icon><ArrowRight /></el-icon>
           </div>
         </div>
 
-        <!-- 会议列表区域 -->
+        <!-- Meetings List Area -->
         <div class="meetings-area">
           <div class="empty-state">
             <div class="empty-illustration">
               <div class="coffee-cup"></div>
             </div>
-            <p class="empty-text">暂无会议</p>
+            <p class="empty-text">No meetings available</p>
           </div>
         </div>
 
-        <!-- 右下角日历按钮 -->
+        <!-- Bottom right calendar button -->
         <div class="calendar-fab">
           <el-icon><Calendar /></el-icon>
         </div>
       </div>
     </div>
 
-    <!-- 用户信息弹窗 -->
-    <el-dialog v-model="showUserDialog" title="用户信息" width="400px">
+    <!-- User information dialog -->
+    <el-dialog v-model="showUserDialog" title="User Information" width="400px">
       <div v-if="userStore.userInfo" class="user-info-content">
         <div class="user-info-item">
-          <span class="label">邮箱：</span>
+          <span class="label">Email:</span>
           <span class="value">{{ userStore.userInfo.email }}</span>
         </div>
         <div class="user-info-item">
-          <span class="label">昵称：</span>
+          <span class="label">Nickname:</span>
           <span class="value">{{ userStore.userInfo.nickName }}</span>
         </div>
         <div class="user-info-item">
-          <span class="label">个人会议号：</span>
+          <span class="label">Personal Meeting ID:</span>
           <span class="value">{{ userStore.userInfo.personalMeetingNo }}</span>
         </div>
       </div>
       <template #footer>
-        <el-button @click="showUserDialog = false">取消</el-button>
-        <el-button type="primary" @click="logout">退出登录</el-button>
+        <el-button @click="showUserDialog = false">Cancel</el-button>
+        <el-button type="primary" @click="logout">Log Out</el-button>
       </template>
     </el-dialog>
   </div>

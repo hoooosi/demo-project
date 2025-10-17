@@ -7,43 +7,36 @@ let reconnectTimer: number | null = null
 let heartbeatTimer: number | null = null
 let connectionState: ConnectionState = ConnectionState.DISCONNECTED
 
-// 发送消息给主线程
+// Send message to main thread
 const postMessageToMain = (type: WorkerMessageType, payload?: any) => {
     self.postMessage({ type, payload } as WorkerMessage)
 }
 
-// 连接 WebSocket
+// Connect to WebSocket
 const connect = (connectConfig: WSConnectConfig) => {
-    console.log('[Worker] Received CONNECT request with config:', connectConfig)
-    config = connectConfig
-
-    if (ws && (ws.readyState === WebSocket.CONNECTING || ws.readyState === WebSocket.OPEN)) {
-        console.log('[Worker] WebSocket already connecting or connected')
-        return
-    }
-
-    connectionState = ConnectionState.CONNECTING
-    console.log('[Worker] Creating WebSocket connection to:', config.url)
-
     try {
-        ws = new WebSocket(config.url)
-        console.log('[Worker] WebSocket instance created, readyState:', ws.readyState)
+        config = connectConfig
+        if (ws && (ws.readyState === WebSocket.CONNECTING || ws.readyState === WebSocket.OPEN))
+            return
+        connectionState = ConnectionState.CONNECTING
 
+        // Create WebSocket
+        ws = new WebSocket(config.url)
         ws.onopen = () => {
-            console.log('[Worker] WebSocket connected')
             connectionState = ConnectionState.CONNECTED
             postMessageToMain(WorkerMessageType.CONNECTED)
 
-            // 清除重连定时器
+            // Clear reconnect timer
             if (reconnectTimer) {
                 clearTimeout(reconnectTimer)
                 reconnectTimer = null
             }
 
-            // 开启心跳
+            // Start heartbeat
             startHeartbeat()
         }
 
+        // Handle incoming messages
         ws.onmessage = (event) => {
             try {
                 const message = JSON.parse(event.data)
@@ -53,11 +46,13 @@ const connect = (connectConfig: WSConnectConfig) => {
             }
         }
 
+        // Handle errors and close events
         ws.onerror = (error) => {
             console.error('[Worker] WebSocket error:', error)
             postMessageToMain(WorkerMessageType.ERROR, { message: 'WebSocket error' })
         }
 
+        // Handle close events
         ws.onclose = (event) => {
             console.log('[Worker] WebSocket closed:', event.code, event.reason)
             connectionState = ConnectionState.DISCONNECTED
@@ -66,25 +61,22 @@ const connect = (connectConfig: WSConnectConfig) => {
                 reason: event.reason,
             })
 
-            // 停止心跳
+            // Stop heartbeat
             stopHeartbeat()
 
-            // 自动重连
-            if (config?.reconnect && !event.wasClean) {
+            // Attempt reconnect
+            if (config?.reconnect && !event.wasClean)
                 attemptReconnect()
-            }
         }
     } catch (error) {
-        console.error('[Worker] Failed to create WebSocket:', error)
         postMessageToMain(WorkerMessageType.ERROR, { message: 'Failed to create WebSocket' })
 
-        if (config?.reconnect) {
+        if (config?.reconnect)
             attemptReconnect()
-        }
     }
 }
 
-// 断开连接
+// Disconnect
 const disconnect = () => {
     if (reconnectTimer) {
         clearTimeout(reconnectTimer)
@@ -102,41 +94,29 @@ const disconnect = () => {
     connectionState = ConnectionState.DISCONNECTED
 }
 
-// 发送消息
-const send = (message: WSMessage) => {
-    if (!ws || ws.readyState !== WebSocket.OPEN) {
-        console.error('[Worker] WebSocket is not connected')
-        postMessageToMain(WorkerMessageType.ERROR, { message: 'WebSocket is not connected' })
-        return
-    }
+// Send message
+const send = (message: Omit<WSMessage, 'senderId' | 'sendTime'>) => {
 
     try {
-        // 添加发送者 ID 和时间戳
-        const fullMessage: WSMessage = {
-            ...message,
-            senderId: String(config?.userId),
-            sendTime: Date.now(),
+        if (!ws || ws.readyState !== WebSocket.OPEN) {
+            console.error('[Worker] WebSocket is not connected')
+            postMessageToMain(WorkerMessageType.ERROR, { message: 'WebSocket is not connected' })
+            return
         }
-
-        ws.send(JSON.stringify(fullMessage))
+        ws.send(JSON.stringify(message))
     } catch (error) {
         console.error('[Worker] Failed to send message:', error)
         postMessageToMain(WorkerMessageType.ERROR, { message: 'Failed to send message' })
     }
 }
 
-// 尝试重连
+// Attempt reconnect
 const attemptReconnect = () => {
-    if (connectionState === ConnectionState.RECONNECTING) {
+    if (connectionState === ConnectionState.RECONNECTING)
         return
-    }
 
     connectionState = ConnectionState.RECONNECTING
-
     const interval = config?.reconnectInterval || 3000
-
-    console.log(`[Worker] Attempting to reconnect in ${interval}ms...`)
-
     reconnectTimer = self.setTimeout(() => {
         if (config) {
             connect(config)
@@ -144,27 +124,18 @@ const attemptReconnect = () => {
     }, interval)
 }
 
-// 启动心跳
+// Start heartbeat
 const startHeartbeat = () => {
-    if (!config?.heartbeatInterval) {
+    if (!config?.heartbeatInterval)
         return
-    }
-
     stopHeartbeat()
-
     heartbeatTimer = self.setInterval(() => {
-        if (ws && ws.readyState === WebSocket.OPEN) {
-            // 发送 ping 消息
-            try {
-                ws.send(JSON.stringify({ messageType: 99 }))
-            } catch (error) {
-                console.error('[Worker] Failed to send heartbeat:', error)
-            }
-        }
+        if (ws && ws.readyState === WebSocket.OPEN)
+            ws.send(JSON.stringify({ messageType: 99 }))
     }, config.heartbeatInterval)
 }
 
-// 停止心跳
+// Stop heartbeat
 const stopHeartbeat = () => {
     if (heartbeatTimer) {
         clearInterval(heartbeatTimer)
@@ -172,14 +143,12 @@ const stopHeartbeat = () => {
     }
 }
 
-// 监听主线程消息
+// Listen for messages from the main thread
 self.addEventListener('message', (event: MessageEvent<WorkerMessage>) => {
     const { type, payload } = event.data
-    console.log('[Worker] Received message from main thread:', type, payload)
 
     switch (type) {
         case WorkerMessageType.CONNECT:
-            console.log('[Worker] Processing CONNECT message')
             connect(payload as WSConnectConfig)
             break
 
@@ -196,5 +165,5 @@ self.addEventListener('message', (event: MessageEvent<WorkerMessage>) => {
     }
 })
 
-// 导出类型（用于 TypeScript）
+
 export type { }

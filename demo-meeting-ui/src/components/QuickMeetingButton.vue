@@ -55,7 +55,7 @@ const handleQuickMeeting = async () => {
       <el-icon v-if="!loading"><Lightning /></el-icon>
       <el-icon v-else class="is-loading"><i-ep-loading /></el-icon>
     </div>
-    <span class="btn-text">快速会议</span>
+    <span class="btn-text">QUICK MEETING</span>
     <span class="dropdown-arrow">▼</span>
   </div>
 </template>

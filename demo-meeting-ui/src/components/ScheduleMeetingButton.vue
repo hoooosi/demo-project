@@ -11,7 +11,7 @@ defineProps<{
     <div class="btn-icon">
       <el-icon><Check /></el-icon>
     </div>
-    <span class="btn-text">预定会议</span>
+    <span class="btn-text">SCHEDULE</span>
     <span class="dropdown-arrow">▼</span>
   </div>
 </template>
