@@ -91,7 +91,7 @@ const handleKeydown = (e: KeyboardEvent) => {
         <el-icon :size="20">
           <ChatDotRound />
         </el-icon>
-        <span>聊天</span>
+        <span>CHAT</span>
       </div>
     </div>
 
@@ -112,7 +112,7 @@ const handleKeydown = (e: KeyboardEvent) => {
         <el-icon :size="48" color="#666">
           <ChatDotRound />
         </el-icon>
-        <p>暂无消息</p>
+        <p>NO NEWS YET</p>
       </div>
     </div>
 
@@ -122,11 +122,11 @@ const handleKeydown = (e: KeyboardEvent) => {
         type="textarea"
         :rows="3"
         resize="none"
-        placeholder="输入消息... (Enter发送, Shift+Enter换行)"
+        placeholder="Enter message... (Press Enter to send, Shift+Enter for new line)"
         @keydown="handleKeydown"
       />
       <el-button type="primary" @click="sendMessage" :disabled="!inputMessage.trim()">
-        发送
+        Send
       </el-button>
     </div>
   </div>

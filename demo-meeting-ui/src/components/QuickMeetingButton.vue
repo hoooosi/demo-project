@@ -10,39 +10,33 @@ const router = useRouter()
 const userStore = useUserStore()
 const loading = ref(false)
 
-// 快速会议逻辑
 const handleQuickMeeting = async () => {
   if (loading.value) return
 
   loading.value = true
   try {
-    // 1. 创建快速会议
-    const meetingName = `${userStore.userInfo?.nickName}的快速会议`
+    const meetingName = `Quick Meeting - ${userStore.userInfo?.nickName}`
     await MeetingApi.quickMeeting({
       meetingName,
-      password: '', // 快速会议默认无密码
+      password: '',
     })
 
-    ElMessage.success('快速会议创建成功')
+    ElMessage.success('Quick meeting created successfully')
 
-    // 2. 验证个人会议号
     if (!userStore.userInfo?.personalMeetingNo) {
-      ElMessage.error('个人会议号不存在')
+      ElMessage.error('Personal meeting number does not exist')
       loading.value = false
       return
     }
 
-    // 3. 预加入验证
     await MeetingApi.preJoinMeeting({
       meetingId: userStore.userInfo.personalMeetingNo,
       password: '',
     })
 
-    // 4. 跳转到会议室（真正的加入会在 MeetingRoom 组件中完成）
     router.push(`/meeting/${userStore.userInfo.personalMeetingNo}`)
-  } catch (error: any) {
-    console.error('Quick meeting failed:', error)
-    ElMessage.error(error?.message || '创建快速会议失败')
+  } catch (e: any) {
+    ElMessage.error(e?.message || 'Quick meeting creation failed')
   } finally {
     loading.value = false
   }
@@ -56,7 +50,6 @@ const handleQuickMeeting = async () => {
       <el-icon v-else class="is-loading"><i-ep-loading /></el-icon>
     </div>
     <span class="btn-text">QUICK MEETING</span>
-    <span class="dropdown-arrow">▼</span>
   </div>
 </template>
 
@@ -109,15 +102,6 @@ const handleQuickMeeting = async () => {
     color: white;
     font-size: 15px;
     font-weight: 500;
-  }
-
-  .dropdown-arrow {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    color: white;
-    font-size: 10px;
-    opacity: 0.8;
   }
 }
 
