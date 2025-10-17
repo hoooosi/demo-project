@@ -8,6 +8,7 @@ import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import java.io.IOException;
 
 @WebFilter(urlPatterns = "/*")
@@ -21,32 +22,9 @@ public class ThreadLocalCleanupFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
         try {
-            parseAndSetContext(request);
             chain.doFilter(request, response);
         } finally {
             TokenUtils.clear();
-        }
-    }
-
-    private void parseAndSetContext(ServletRequest request) {
-        if (!(request instanceof HttpServletRequest httpRequest)) {
-            return;
-        }
-
-        String token = httpRequest.getHeader("token");
-        if (token == null || token.trim().isEmpty()) {
-            TokenUtils.setUserContext(UserContext.empty());
-            return;
-        }
-
-        token = token.trim();
-
-        Long userId = redisUtils.getUserIdByToken(token);
-        if (userId != null) {
-            UserContext userContext = new UserContext(token, userId);
-            TokenUtils.setUserContext(userContext);
-        } else {
-            TokenUtils.setUserContext(UserContext.empty());
         }
     }
 }

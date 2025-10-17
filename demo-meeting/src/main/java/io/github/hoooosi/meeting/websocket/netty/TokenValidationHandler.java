@@ -1,5 +1,6 @@
 package io.github.hoooosi.meeting.websocket.netty;
 
+import io.github.hoooosi.meeting.common.model.dto.TokenDTO;
 import io.github.hoooosi.meeting.common.utils.RedisUtils;
 import io.github.hoooosi.meeting.websocket.ChannelContextUtils;
 import io.netty.buffer.Unpooled;
@@ -34,17 +35,15 @@ public class TokenValidationHandler extends SimpleChannelInboundHandler<FullHttp
             return;
         }
 
-        String token = tokens.getFirst();
-        Long userId = this.getUserIdFromToken(token);
-        if (userId == null) {
+        String tokenKey = tokens.getFirst();
+        TokenDTO tokenDTO = redisUtils.getTokenDTO(tokenKey);
+        if (tokenDTO == null) {
             this.sendErrorResp(ctx);
             return;
         }
 
+        channelContextUtils.addContext(tokenDTO.getUserId(), ctx.channel());
         ctx.fireChannelRead(request.retain());
-
-        // TODO
-        channelContextUtils.addContext(userId, ctx.channel());
     }
 
     private void sendErrorResp(ChannelHandlerContext ctx) {
@@ -53,9 +52,5 @@ public class TokenValidationHandler extends SimpleChannelInboundHandler<FullHttp
                 .set(HttpHeaderNames.CONTENT_TYPE, "text/plain; charset=utf-8")
                 .set(HttpHeaderNames.CONTENT_LENGTH, resp.content().readableBytes());
         ctx.writeAndFlush(resp).addListener(ChannelFutureListener.CLOSE);
-    }
-
-    public Long getUserIdFromToken(String token) {
-        return redisUtils.getUserIdByToken(token);
     }
 }

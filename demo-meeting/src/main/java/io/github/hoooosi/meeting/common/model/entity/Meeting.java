@@ -14,12 +14,13 @@ import lombok.experimental.Accessors;
 public class Meeting extends TimeField {
     @TableId(value = "meeting_id", type = IdType.ASSIGN_ID)
     private Long meetingId;
-    private String meetingNo;
+    private Long meetingNo;
     private String meetingName;
     private Long startTime;
     private Long endTime;
     private Integer joinType;
     private String joinPass;
+    private Integer status;
     private Long creator;
 }
 

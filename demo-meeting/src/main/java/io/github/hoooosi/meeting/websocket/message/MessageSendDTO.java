@@ -8,12 +8,11 @@ import java.io.Serializable;
 @Data
 @Accessors(chain = true)
 public class MessageSendDTO<T> implements Serializable {
-    private Integer messageSendType;
-    private String meetingId;
-    private Long receiverId;
-    private Integer messageType;
+    private int messageTargetType;
+    private int messageType;
+    private String receiverId;
+
     private String senderId;
-    private String senderNickName;
     private T content;
-    private Long sendTime;
+    private String sendTime;
 }

@@ -12,12 +12,6 @@ public class Resp<T> {
         return new Resp<>();
     }
 
-    public static <T> Resp<T> success(String msg) {
-        Resp<T> resp = new Resp<>();
-        resp.setMessage(msg);
-        return resp;
-    }
-
     public static <T> Resp<T> success(T data) {
         Resp<T> resp = new Resp<>();
         resp.setData(data);

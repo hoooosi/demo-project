@@ -4,6 +4,7 @@ import io.github.hoooosi.meeting.common.annotation.CheckLogin;
 import io.github.hoooosi.meeting.common.exception.BusinessException;
 import io.github.hoooosi.meeting.common.exception.ErrorCode;
 import io.github.hoooosi.meeting.common.utils.TokenUtils;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -18,17 +19,20 @@ import org.springframework.stereotype.Component;
 @Aspect
 @Component
 @Slf4j
+@AllArgsConstructor
 public class LoginCheckAspect {
+
+    private final TokenUtils tokenUtils;
 
     @Around("@annotation(checkLogin)")
     public Object checkLogin(ProceedingJoinPoint joinPoint, CheckLogin checkLogin) throws Throwable {
         // 检查用户是否已登录
-        if (TokenUtils.isNotLogin()) {
+        if (!tokenUtils.isLogin()) {
             log.warn("用户未登录或 token 无效，拒绝访问: {}", joinPoint.getSignature());
             throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
 
-        Long userId = TokenUtils.getUserContext().userId();
+        Long userId = tokenUtils.getUserId();
         log.debug("用户 {} 通过鉴权，访问: {}", userId, joinPoint.getSignature());
 
         // 继续执行目标方法

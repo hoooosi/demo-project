@@ -48,21 +48,20 @@ public class NettyWebSocketStarter implements ApplicationRunner {
                             ChannelPipeline pipeline = channel.pipeline();
                             pipeline.addLast(new HttpServerCodec())
                                     .addLast(new HttpObjectAggregator(65536))
-                                    .addLast(new IdleStateHandler(6, 0, 0))
-                                    .addLast(new HeartHandler())
+//                                    .addLast(new IdleStateHandler(60, 0, 0))
+//                                    .addLast(new HeartHandler())
                                     .addLast(tokenValidationHandler)
                                     .addLast(webSocketHandler)
-                                    .addLast(new WebSocketServerProtocolHandler("/ws", null, true, 6553, true, true));
+                                    .addLast(new WebSocketServerProtocolHandler("/ws", null, true, 65536, true, true));
                         }
                     });
-            Channel channel = bootstrap.bind(8081).sync().channel();
+            Channel channel = bootstrap.bind(8089).sync().channel();
             log.info("WebSocket started");
             channel.closeFuture().sync();
         } catch (Exception e) {
             log.error("Netty Error", e);
         } finally {
-            bossGroup.shutdownGracefully();
-            workerGroup.shutdownGracefully();
+            this.shutdown();
         }
     }
 }
