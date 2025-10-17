@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
-import { watch, onMounted, watchEffect } from 'vue'
+import { onMounted, watchEffect } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { wsManager } from '@/utils/websocket'
-import { lo } from 'element-plus/es/locales.mjs'
 import { UserApi } from './api'
 
 const userStore = useUserStore()

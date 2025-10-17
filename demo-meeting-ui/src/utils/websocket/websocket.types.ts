@@ -25,6 +25,7 @@ export enum MessageType {
     FILE = 3,
     AUDIO = 4,
     VIDEO = 5,
+    EVENT = 50,
 
     SIGNAL = 98,
 }

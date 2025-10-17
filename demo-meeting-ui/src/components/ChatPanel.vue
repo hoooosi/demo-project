@@ -17,6 +17,7 @@ interface ChatMessage {
   content: string
   time: string
   isLocal: boolean
+  isEvent?: boolean
 }
 
 const messages = ref<ChatMessage[]>([])
@@ -54,26 +55,45 @@ const handleIncomingMessage = (wsMessage: WSMessage) => {
     senderId: wsMessage.senderId,
     senderName: wsMessage.senderId,
     content: wsMessage.content,
-    time: new Date(wsMessage.sendTime).toLocaleTimeString('zh-CN', {
+    time: new Date(Number(wsMessage.sendTime)).toLocaleTimeString('zh-CN', {
       hour: '2-digit',
       minute: '2-digit',
     }),
-    isLocal: false,
+    isLocal: wsMessage.senderId === userStore.userInfo?.userId,
+    isEvent: false,
   })
 
   scrollToBottom()
 }
 
-let unsubscribe: (() => void) | null = null
+const handleEventMessage = (wsMessage: WSMessage) => {
+  if (wsMessage.messageType !== MessageType.EVENT) return
+
+  messages.value.push({
+    id: Date.now().toString() + Math.random(),
+    senderId: wsMessage.senderId,
+    senderName: wsMessage.senderId,
+    content: wsMessage.content,
+    time: new Date(Number(wsMessage.sendTime)).toLocaleTimeString('zh-CN', {
+      hour: '2-digit',
+      minute: '2-digit',
+    }),
+    isLocal: false,
+    isEvent: true,
+  })
+
+  scrollToBottom()
+}
+
+const unsubscribers: Array<() => void> = []
 
 onMounted(() => {
-  unsubscribe = wsManager.on(MessageType.TEXT, handleIncomingMessage)
+  unsubscribers.push(wsManager.on(MessageType.TEXT, handleIncomingMessage))
+  unsubscribers.push(wsManager.on(MessageType.EVENT, handleEventMessage))
 })
 
 onBeforeUnmount(() => {
-  if (unsubscribe) {
-    unsubscribe()
-  }
+  unsubscribers.forEach((unsubscribe) => unsubscribe())
 })
 
 const handleKeydown = (e: KeyboardEvent) => {
@@ -94,19 +114,25 @@ const handleKeydown = (e: KeyboardEvent) => {
         <span>CHAT</span>
       </div>
     </div>
-
     <div class="chat-messages" ref="chatListRef">
       <div
         v-for="message in messages"
         :key="message.id"
         class="message-item"
-        :class="{ 'message-local': message.isLocal }"
+        :class="{ 'message-local': message.isLocal, 'message-event': message.isEvent }"
       >
-        <div class="message-sender">{{ message.senderName }}</div>
-        <div class="message-content">
-          <div class="message-bubble">{{ message.content }}</div>
-          <div class="message-time">{{ message.time }}</div>
-        </div>
+        <template v-if="message.isEvent">
+          <div class="event-message">
+            {{ message.content }}
+          </div>
+        </template>
+        <template v-else>
+          <div class="message-sender">{{ message.senderName }}</div>
+          <div class="message-content">
+            <div class="message-bubble">{{ message.content }}</div>
+            <div class="message-time">{{ message.time }}</div>
+          </div>
+        </template>
       </div>
       <div v-if="messages.length === 0" class="empty-state">
         <el-icon :size="48" color="#666">
@@ -162,11 +188,15 @@ const handleKeydown = (e: KeyboardEvent) => {
     display: flex;
     flex-direction: column;
     gap: 16px;
-
     .message-item {
       display: flex;
       flex-direction: column;
       align-items: flex-start;
+
+      &.message-event {
+        align-items: center;
+        width: 100%;
+      }
 
       &.message-local {
         align-items: flex-end;
@@ -183,6 +213,18 @@ const handleKeydown = (e: KeyboardEvent) => {
         .message-time {
           text-align: right;
         }
+      }
+
+      .event-message {
+        background: rgba(128, 128, 128, 0.3);
+        color: #ccc;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 13px;
+        text-align: center;
+        max-width: 80%;
+        word-wrap: break-word;
+        word-break: break-word;
       }
 
       .message-sender {

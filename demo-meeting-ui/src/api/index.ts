@@ -58,7 +58,9 @@ const MeetingApi = {
   preJoinMeeting: async (dto: DTO.PreJoinMeetingDTO): Promise<Resp<void>> =>
     service.post(`/meeting/preJoinMeeting`, dto),
   joinMeeting: async (dto: DTO.JoinMeetingDTO): Promise<Resp<string[]>> =>
-    service.post(`/meeting/joinMeeting`, dto)
+    service.post(`/meeting/joinMeeting`, dto),
+  leaveMeeting: async (): Promise<Resp<void>> =>
+    service.get(`/meeting/leaveMeeting`),
 }
 
 

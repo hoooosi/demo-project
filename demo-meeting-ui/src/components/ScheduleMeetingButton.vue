@@ -12,7 +12,6 @@ defineProps<{
       <el-icon><Check /></el-icon>
     </div>
     <span class="btn-text">SCHEDULE</span>
-    <span class="dropdown-arrow">▼</span>
   </div>
 </template>
 
@@ -56,15 +55,6 @@ defineProps<{
     color: white;
     font-size: 15px;
     font-weight: 500;
-  }
-
-  .dropdown-arrow {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    color: white;
-    font-size: 10px;
-    opacity: 0.8;
   }
 }
 </style>

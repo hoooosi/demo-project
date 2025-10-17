@@ -13,7 +13,7 @@ import {
   ArrowRight,
   Close,
 } from '@element-plus/icons-vue'
-import { UserApi } from '@/api'
+import { MeetingApi, UserApi } from '@/api'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import JoinMeetingButton from '@/components/JoinMeetingButton.vue'
@@ -27,12 +27,9 @@ const userStore = useUserStore()
 const currentDate = ref('')
 const currentWeekday = ref('')
 
-const initDate = () => {
+const initDate = async () => {
   const now = new Date()
-  const month = now.getMonth() + 1
-  const date = now.getDate()
-  currentDate.value = `${month}Month${date}Day`
-
+  currentDate.value = now.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })
   const weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
   const dayIndex = now.getDay()
   currentWeekday.value = `Weekday ${weekdays[dayIndex]}`
@@ -40,17 +37,6 @@ const initDate = () => {
 
 // User information dialog
 const showUserDialog = ref(false)
-
-// Check user status
-const checkUserStatus = async () => {
-  try {
-    const result = await UserApi.me()
-    userStore.setUserInfo(result.data)
-  } catch (error) {
-    ElMessage.error('Please log in first')
-    router.push('/login')
-  }
-}
 
 // Operation button events
 const handleScheduleMeeting = () => {
@@ -75,7 +61,6 @@ const showBanner = ref(true)
 
 onMounted(async () => {
   initDate()
-  await checkUserStatus()
 })
 </script>
 

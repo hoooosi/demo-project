@@ -84,6 +84,7 @@ const toggleScreenSharing = async () => {
 
 // Leave meeting
 const leaveMeeting = () => {
+  MeetingApi.leaveMeeting()
   router.push('/dashboard')
 }
 
