@@ -64,7 +64,6 @@ public class MeetingController {
     @CheckLogin
     public Resp<Void> leaveMeeting() {
         TokenDTO tokenDTO = tokenUtils.getTokenDTO();
-        log.info("tokenDto: {}",tokenDTO);
         meetingService.leaveMeeting(tokenDTO.getRoomId(), tokenDTO.getUserId());
         return Resp.success();
     }
