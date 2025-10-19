@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.github.hoooosi.imagehosting.mapper.ImageIndexMapper">
+    <resultMap id="imageVO" type="io.github.hoooosi.imagehosting.vo.ImageVO">
+        <result property="tags" column="tags"
+                typeHandler="io.github.hoooosi.imagehosting.type.handler.JsonbTypeHandler"/>
+        <result property="items" column="items"
+                typeHandler="io.github.hoooosi.imagehosting.type.handler.JsonbTypeHandler"/>
+    </resultMap>
+
+    <!--suppress SqlNoDataSourceInspection, SqlResolve -->
+    <sql id="selectImageVO">
+        SELECT idx.id,
+               idx.space_id,
+               idx.user_id,
+               idx.first_item_id,
+               idx.name,
+               idx.introduction,
+               idx.tags,
+               idx.create_time,
+               idx.update_time,
+               u.name                          AS creator_name,
+               u.avatar                        AS creator_avatar,
+               COALESCE(ai.items, '[]'::jsonb) AS items
+    </sql>
+
+    <!--suppress SqlNoDataSourceInspection, SqlResolve -->
+    <sql id="selectItem">
+        SELECT it.idx_id,
+               jsonb_agg(jsonb_build_object(
+                                 'id', it.id,
+                                 'spaceId', it.space_id,
+                                 'idxId', it.idx_id,
+                                 'fileId', it.file_id,
+                                 'status', it.status,
+                                 'md5', it.md5,
+                                 'contentType', it.content_type,
+                                 'size', it.size,
+                                 'width', it.width,
+                                 'height', it.height,
+                                 'createTime', it.create_time,
+                                 'updateTime', it.update_time
+                         ) ORDER BY it.id) AS items
+    </sql>
+
+    <sql id="filterImageVO">
+        <if test="params != null and params.userId != null">
+            AND idx.user_id = #{params.userId}
+        </if>
+        <if test="params != null and params.spaceId != null">
+            AND idx.space_id = #{params.spaceId}
+        </if>
+        <if test="params != null and params.keyword != null and params.keyword != ''">
+            AND (idx.introduction ILIKE CONCAT('%', #{params).keyword}, '%')
+            OR idx.name ILIKE CONCAT('%', #{params).keyword}, '%'))
+        </if>
+        <if test="params != null and params.tags != null and params.tags.size() > 0">
+            <foreach collection="params.tags" item="tag" open="AND (" separator=" OR " close=")">
+                idx.tags @> jsonb_build_array(#{tag})
+            </foreach>
+        </if>
+
+        ORDER BY idx.id
+        <if test="params != null">
+            <if test="params.asc">ASC</if>
+            <if test="!params.asc">DESC</if>
+        </if>
+    </sql>
+
+
+    <select id="queryPublic" resultMap="imageVO">
+        WITH all_items AS (
+        <include refid="selectItem"/>
+        FROM tb_image_item it
+        WHERE it.status = 'SUCCESS'
+        GROUP BY it.idx_id )
+        <include refid="selectImageVO"/>
+        FROM tb_image_index idx
+        INNER JOIN tb_space s ON idx.space_id = s.id
+        LEFT JOIN tb_user u ON idx.user_id = u.id
+        LEFT JOIN all_items ai ON ai.idx_id = idx.id
+        <where>
+            s.public_permission_mask &amp; 2097152 = 2097152
+            <include refid="filterImageVO"/>
+        </where>
+    </select>
+
+    <select id="queryAll" resultMap="imageVO">
+        WITH all_items AS (
+        <include refid="selectItem"/>
+        FROM tb_image_item it
+        GROUP BY it.idx_id)
+        <include refid="selectImageVO"/>
+        FROM tb_image_index idx
+        LEFT JOIN tb_user u ON idx.user_id = u.id
+        LEFT JOIN all_items ai ON ai.idx_id = idx.id
+        <where>
+            true
+            <include refid="filterImageVO"/>
+        </where>
+    </select>
+
+    <select id="getAllowImgIds" resultType="java.lang.Long">
+        SELECT idx.id
+        FROM tb_image_index AS idx
+        LEFT JOIN tb_space AS s ON idx.space_id = s.id
+        LEFT JOIN tb_member AS m ON idx.space_id = m.space_id AND m.user_id = #{userId}
+        WHERE idx.id IN
+        <foreach item="id" collection="ids" open="(" separator="," close=")">#{id}</foreach>
+        AND ( idx.user_id = #{userId} OR ((m.permission_mask &amp; 16777216) = 16777216 ))
+    </select>
+
+    <select id="deleteAndSumSize" resultType="long">
+        WITH deleted_items_size AS (
+        SELECT COALESCE(SUM(tii.size), 0) AS total_deleted_size
+        FROM tb_image_item tii
+        WHERE tii.idx_id IN
+        <foreach item="id" collection="ids" open="(" separator="," close=")">#{id}</foreach>
+        ),
+        delete_index AS (
+        DELETE FROM tb_image_index
+        WHERE id IN
+        <foreach item="id" collection="ids" open="(" separator="," close=")">#{id}</foreach>
+        RETURNING id )
+        SELECT total_deleted_size FROM deleted_items_size
+    </select>
+
+    <select id="getFirstFileByIdxId" resultType="io.github.hoooosi.imagehosting.entity.ImageFile">
+        SELECT f.*
+        FROM "tb_image_file" f
+                 JOIN "tb_image_item" i ON f.id = i.file_id
+        WHERE i.id = (SELECT first_item_id
+                      FROM "tb_image_index"
+                      WHERE id = #{idxId})
+    </select>
+
+    <select id="getAllTags" resultType="java.lang.String">
+        SELECT DISTINCT jsonb_array_elements_text(tags) AS tag
+        FROM tb_image_index
+        WHERE tags IS NOT NULL
+          AND jsonb_array_length(tags) > 0
+        ORDER BY tag
+    </select>
+</mapper>
