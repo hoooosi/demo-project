@@ -37,5 +37,10 @@ rocketmq:
     group: meeting-producer-group
     send-message-timeout: 3000
     retry-times-when-send-failed: 2
-
+#=======================================================================================================================
+minio:
+  endpoint: http://192.168.31.3:9000
+  access-key: minio
+  secret-key: 12345678
+  bucket-name: picture
 

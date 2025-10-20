@@ -112,10 +112,21 @@
             <artifactId>netty-all</artifactId>
             <version>4.1.100.Final</version>
         </dependency>
+        <!-- MinIO -->
+        <dependency>
+            <groupId>io.minio</groupId>
+            <artifactId>minio</artifactId>
+        </dependency>
     </dependencies>
 
     <dependencyManagement>
         <dependencies>
+            <!-- MinIO -->
+            <dependency>
+                <groupId>io.minio</groupId>
+                <artifactId>minio</artifactId>
+                <version>8.2.2</version>
+            </dependency>
             <!-- Spring Boot 依赖管理 -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
