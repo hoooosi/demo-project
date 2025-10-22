@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import fs from 'fs/promises';
-import { validatePath } from './utils.js';
+import { validatePath } from '../utils/index.js';
 
 export const editFileConfig = {
     title: 'Edit File',

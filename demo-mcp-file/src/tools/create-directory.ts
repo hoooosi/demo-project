@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import fs from 'fs/promises';
-import { validatePath, pathExists } from './utils.js';
+import { validatePath, pathExists } from '../utils/index.js';
 
 export const createDirectoryConfig = {
     title: 'Create Directory',

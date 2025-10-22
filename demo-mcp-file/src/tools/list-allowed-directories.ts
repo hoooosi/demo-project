@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import path from 'path';
-import { ALLOWED_DIRS } from '../config.js';
+import { WORKSPACE_PATH } from '../../config.js';
 
 export const listAllowedDirectoriesConfig = {
     title: 'List Allowed Directories',
@@ -14,8 +14,8 @@ export async function listAllowedDirectories(params: any) {
     const { absolute } = params;
 
     const directories = absolute
-        ? ALLOWED_DIRS.map(dir => path.resolve(dir))
-        : ALLOWED_DIRS;
+        ? WORKSPACE_PATH.map(dir => path.resolve(dir))
+        : WORKSPACE_PATH;
 
     return {
         content: [{ type: 'text' as const, text: JSON.stringify(directories, null, 2) }],

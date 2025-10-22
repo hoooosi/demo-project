@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import fs from 'fs/promises';
 import path from 'path';
-import { validatePath } from './utils.js';
+import { validatePath } from '../utils/index.js';
 
 export const getFileInfoConfig = {
     title: 'Get File Info',

@@ -1,20 +1,20 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import express from 'express';
-import { ALLOWED_DIRS, PORT } from './config.js';
+import { WORKSPACE_PATH, PORT } from './config.js';
 
 // Import all tools and configs
-import { readFile, readFileConfig } from './tools/read-file.js';
-import { readMultipleFiles, readMultipleFilesConfig } from './tools/read-multiple-files.js';
-import { writeFile, writeFileConfig } from './tools/write-file.js';
-import { editFile, editFileConfig } from './tools/edit-file.js';
-import { createDirectory, createDirectoryConfig } from './tools/create-directory.js';
-import { listDirectory, listDirectoryConfig } from './tools/list-directory.js';
-import { directoryTree, directoryTreeConfig } from './tools/directory-tree.js';
-import { moveFile, moveFileConfig } from './tools/move-file.js';
-import { searchFiles, searchFilesConfig } from './tools/search-files.js';
-import { getFileInfo, getFileInfoConfig } from './tools/get-file-info.js';
-import { listAllowedDirectories, listAllowedDirectoriesConfig } from './tools/list-allowed-directories.js';
+import { readFile, readFileConfig } from './src/tools/read-file.js';
+import { readMultipleFiles, readMultipleFilesConfig } from './src/tools/read-multiple-files.js';
+import { writeFile, writeFileConfig } from './src/tools/write-file.js';
+import { editFile, editFileConfig } from './src/tools/edit-file.js';
+import { createDirectory, createDirectoryConfig } from './src/tools/create-directory.js';
+import { listDirectory, listDirectoryConfig } from './src/tools/list-directory.js';
+import { directoryTree, directoryTreeConfig } from './src/tools/directory-tree.js';
+import { moveFile, moveFileConfig } from './src/tools/move-file.js';
+import { searchFiles, searchFilesConfig } from './src/tools/search-files.js';
+import { getFileInfo, getFileInfoConfig } from './src/tools/get-file-info.js';
+import { listAllowedDirectories, listAllowedDirectoriesConfig } from './src/tools/list-allowed-directories.js';
 
 // Create an MCP server for file operations
 const server = new McpServer({
@@ -77,7 +77,7 @@ app.post('/mcp', async (req, res) => {
 const port = PORT;
 app.listen(port, () => {
     console.log(`File Operations MCP Server running on http://localhost:${port}/mcp`);
-    console.log(`Allowed directories: ${ALLOWED_DIRS.join(', ')}`);
+    console.log(`Allowed directories: ${WORKSPACE_PATH}`);
 }).on('error', error => {
     console.error('Server error:', error);
     process.exit(1);
