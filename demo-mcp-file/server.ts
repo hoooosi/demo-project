@@ -14,7 +14,7 @@ import { directoryTree, directoryTreeConfig } from './src/tools/directory-tree.j
 import { moveFile, moveFileConfig } from './src/tools/move-file.js';
 import { searchFiles, searchFilesConfig } from './src/tools/search-files.js';
 import { getFileInfo, getFileInfoConfig } from './src/tools/get-file-info.js';
-import { listAllowedDirectories, listAllowedDirectoriesConfig } from './src/tools/list-allowed-directories.js';
+import { deletePath, deletePathConfig } from './src/tools/delete-path.js';
 
 // Create an MCP server for file operations
 const server = new McpServer({
@@ -52,8 +52,8 @@ server.registerTool('search_files', searchFilesConfig, (params) => searchFiles(p
 // Register get_file_info tool
 server.registerTool('get_file_info', getFileInfoConfig, (params) => getFileInfo(params));
 
-// Register list_allowed_directories tool
-server.registerTool('list_allowed_directories', listAllowedDirectoriesConfig, (params) => listAllowedDirectories(params));
+// Register delete_path tool
+server.registerTool('delete_path', deletePathConfig, (params) => deletePath(params));
 
 // Set up Express and HTTP transport
 const app = express();

@@ -5,7 +5,7 @@
 ## 任务安排
 
 - [x] 调整工作目录为单个，允许相对目录
-- [] 添加删除文件/文件夹功能
+- [x] 添加删除文件/文件夹功能
 - [] 优化提示词
 
 ## 功能特性
@@ -44,9 +44,13 @@
    - 返回: 操作结果、写入行数等信息
    - 自动创建父目录
 
-3. **delete_file** - 删除文件
+3. **delete_path** - 删除文件或目录
 
-   - 参数: `filePath` (字符串) - 要删除的文件路径
+   - 参数:
+     - `path` (字符串，必需) - 要删除的文件或目录路径
+     - `recursive` (布尔值，可选，默认 false) - 是否递归删除目录及其内容（非空目录必须设为 true）
+     - `force` (布尔值，可选，默认 false) - 如果路径不存在是否忽略错误
+   - 返回: 删除结果、路径类型（文件/目录）等信息
 
 4. **list_directory** - 列出目录内容
 
@@ -324,6 +328,61 @@ curl -X POST http://localhost:3000/mcp \
         "filePath": "data.txt",
         "startLine": 5,
         "endLine": 10
+      }
+    }
+  }'
+```
+
+#### 删除文件
+
+```bash
+curl -X POST http://localhost:3000/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 2,
+    "method": "tools/call",
+    "params": {
+      "name": "delete_path",
+      "arguments": {
+        "path": "temp.txt"
+      }
+    }
+  }'
+```
+
+#### 删除空目录
+
+```bash
+curl -X POST http://localhost:3000/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 2,
+    "method": "tools/call",
+    "params": {
+      "name": "delete_path",
+      "arguments": {
+        "path": "empty-folder"
+      }
+    }
+  }'
+```
+
+#### 递归删除目录及其内容
+
+```bash
+curl -X POST http://localhost:3000/mcp \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 2,
+    "method": "tools/call",
+    "params": {
+      "name": "delete_path",
+      "arguments": {
+        "path": "folder-with-files",
+        "recursive": true
       }
     }
   }'
