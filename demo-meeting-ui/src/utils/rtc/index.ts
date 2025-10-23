@@ -2,6 +2,7 @@ import { reactive } from 'vue'
 import { wsManager, MessageType } from '@/utils/websocket'
 import type { WSMessage } from '@/utils/websocket'
 import SimplePeer from 'simple-peer'
+import { defaultRTCConfig } from '@/utils/rtc/rtc.config'
 
 export interface Participant {
     userId: string
@@ -13,11 +14,15 @@ export function useWebRTC() {
     let currentStream: MediaStream | undefined
     const localMap = reactive(new Map<string, Participant>())
 
+    // Use ICE servers from config (includes COTURN for NAT traversal)
+    const { iceServers } = defaultRTCConfig
+
     const SIGNAL_LISTENER = wsManager.on(MessageType.SIGNAL, async (msg: WSMessage) => {
         const { senderId, content } = msg
         const peer = localMap.get(senderId)?.peer || createNewPeer({
             initiator: false,
-            trickle: true
+            trickle: true,
+            config: { iceServers }
         }, senderId)
         peer.signal(content)
     })
@@ -69,7 +74,8 @@ export function useWebRTC() {
     const createRTC = async (userId: string) => {
         createNewPeer({
             initiator: true,
-            trickle: true
+            trickle: true,
+            config: { iceServers }
         }, userId)
     }
 
