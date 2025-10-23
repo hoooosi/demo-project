@@ -1,0 +1,22 @@
+{
+  "name": "demo-mcp-server-file",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "bun run index.ts",
+    "dev": "bun --watch index.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.20.1",
+    "@types/express": "^5.0.3",
+    "express": "^5.1.0",
+    "zod": "^3.25.76"
+  }
+}
