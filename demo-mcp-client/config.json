@@ -1,0 +1,19 @@
+{
+    "servers": {
+        "fetch": {
+            "type": "stdio",
+            "args": [
+                "mcp-server-fetch"
+            ],
+            "command": "uvx"
+        },
+        "howtocook-mcp": {
+            "type": "stdio",
+            "command": "npx",
+            "args": [
+                "-y",
+                "howtocook-mcp"
+            ]
+        }
+    }
+}

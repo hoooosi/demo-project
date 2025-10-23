@@ -1,0 +1,31 @@
+{
+  "name": "demo-mcp-client",
+  "version": "1.0.0",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "description": "MCP Client with OpenAI Integration - TypeScript example",
+  "scripts": {
+    "start": "bun run index.ts",
+    "interactive": "bun run interactive.ts",
+    "examples": "bun run examples.ts",
+    "dev": "bun --watch index.ts",
+    "test-config": "bun run test-config.ts",
+    "test": "bun run test-integration.ts",
+    "example": "bun run example.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/node": "^24.9.1"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.20.1",
+    "openai": "^6.6.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
