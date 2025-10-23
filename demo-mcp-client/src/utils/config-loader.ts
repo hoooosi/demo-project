@@ -17,7 +17,6 @@ export async function loadMCPConfig(configPath: string = './config.json'): Promi
             throw new Error('Invalid configuration: "servers" field is required and must be an object');
         }
 
-
         for (const [serverName, serverConfig] of Object.entries(config.servers)) {
             if (!serverConfig.command) {
                 throw new Error(`Invalid configuration for server "${serverName}": "command" is required`);
@@ -40,26 +39,8 @@ export async function loadMCPConfig(configPath: string = './config.json'): Promi
 }
 
 /**
- * Get a specific server configuration
+ * Get default model from environment or fallback
  */
-export function getServerConfig(config: MCPConfig, serverName: string): MCPServerConfig {
-    const serverConfig = config.servers[serverName];
-    if (!serverConfig) {
-        throw new Error(`Server "${serverName}" not found in configuration`);
-    }
-    return serverConfig;
-}
-
-/**
- * List all available server names
- */
-export function listServerNames(config: MCPConfig): string[] {
-    return Object.keys(config.servers);
-}
-
-/**
- * Get all server configurations
- */
-export function getAllServerConfigs(config: MCPConfig): Record<string, MCPServerConfig> {
-    return config.servers;
+export function getDefaultModel(): string {
+    return process.env.OPENAI_MODEL || 'gemini-2.5-flash-preview-05-20';
 }

@@ -6,13 +6,7 @@
   "private": true,
   "description": "MCP Client with OpenAI Integration - TypeScript example",
   "scripts": {
-    "start": "bun run index.ts",
-    "interactive": "bun run interactive.ts",
-    "examples": "bun run examples.ts",
-    "dev": "bun --watch index.ts",
-    "test-config": "bun run test-config.ts",
-    "test": "bun run test-integration.ts",
-    "example": "bun run example.ts"
+    "start": "bun run index.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",
@@ -23,6 +17,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.20.1",
+    "dotenv": "^17.2.3",
     "openai": "^6.6.0"
   },
   "engines": {

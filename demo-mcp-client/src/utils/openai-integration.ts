@@ -1,9 +1,7 @@
 import OpenAI from 'openai';
-import type {
-    ChatCompletionTool,
-    ChatCompletionMessageParam,
-} from 'openai/resources/chat/completions';
+import type { ChatCompletionTool } from 'openai/resources/chat/completions';
 import type { MCPTool } from '../types';
+import 'dotenv/config';
 
 /**
  * Convert MCP tool schema to OpenAI function schema
@@ -51,7 +49,14 @@ export function createOpenAIClient(config?: {
     apiKey?: string;
 }): OpenAI {
     return new OpenAI({
-        baseURL: config?.baseURL || 'http://192.168.31.3:16000/proxy/gemini/v1beta/openai/',
-        apiKey: config?.apiKey || 'token',
+        baseURL: config?.baseURL || process.env.OPENAI_BASE_URL || 'http://192.168.31.3:16000/proxy/gemini/v1beta/openai/',
+        apiKey: config?.apiKey || process.env.OPENAI_API_KEY || 'token',
     });
+}
+
+/**
+ * Get default model from environment or fallback
+ */
+export function getDefaultModel(): string {
+    return process.env.OPENAI_MODEL || 'gemini-2.5-flash-preview-05-20';
 }

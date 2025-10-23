@@ -7,12 +7,12 @@
             ],
             "command": "uvx"
         },
-        "howtocook-mcp": {
+        "time": {
             "type": "stdio",
-            "command": "npx",
+            "command": "uvx",
             "args": [
-                "-y",
-                "howtocook-mcp"
+                "mcp-server-time",
+                "--local-timezone=America/New_York"
             ]
         }
     }

@@ -1,4 +1,4 @@
-import type { MCPConfig, MCPServerConfig, MCPTool, ToolCallResult } from '../types';
+import type { MCPServerConfig, MCPTool, ToolCallResult } from '../types';
 import { MCPServerConnection } from './mcp-server-connection';
 
 /**
@@ -6,14 +6,11 @@ import { MCPServerConnection } from './mcp-server-connection';
  * Aggregates tools from all servers and routes tool calls
  */
 export class MCPManager {
-    private mcpConfig: Record<string, MCPServerConfig>;
     private servers: Map<string, MCPServerConnection> = new Map();
     private toolToServerMap: Map<string, string> = new Map();
     private allTools: MCPTool[] = [];
 
-    constructor(config: Record<string, MCPServerConfig>) {
-        this.mcpConfig = config;
-    }
+    constructor(private mcpConfig: Record<string, MCPServerConfig>) { }
 
     /**
      * Initialize all servers from config
@@ -26,7 +23,9 @@ export class MCPManager {
             return;
         }
 
-        console.log(`🚀 Initializing ${serverNames.length} MCP server(s)...`);        // Connect to all servers
+        console.log(`🚀 Initializing ${serverNames.length} MCP server(s)...`);
+
+        // Connect to all servers
         const connectionPromises = serverNames.map(async (serverName) => {
             const serverConfig = this.mcpConfig[serverName];
             if (!serverConfig) {
@@ -66,15 +65,10 @@ export class MCPManager {
 
         for (const [serverName, connection] of this.servers.entries()) {
             try {
-                const tools = await connection.listTools();
-
-                for (const tool of tools) {
-                    // Add server prefix to avoid name conflicts
-                    const prefixedToolName = `${serverName}__${tool.name}`;
-
-                    // Store mapping
-                    this.toolToServerMap.set(prefixedToolName, serverName);
-                    this.toolToServerMap.set(tool.name, serverName); // Also support unprefixed
+                const tools = await connection.listTools(); for (const tool of tools) {
+                    // Store mapping (support both prefixed and unprefixed names)
+                    this.toolToServerMap.set(`${serverName}__${tool.name}`, serverName);
+                    this.toolToServerMap.set(tool.name, serverName);
                     this.allTools.push(tool);
                     console.log(`   ✓ ${serverName}: ${tool.name}`);
                 }
@@ -118,23 +112,7 @@ export class MCPManager {
         }
 
         return await connection.callTool(actualToolName, args);
-    }
-
-    /**
-     * Get list of connected servers
-     */
-    getConnectedServers(): string[] {
-        return Array.from(this.servers.keys());
-    }
-
-    /**
-     * Get server connection by name
-     */
-    getServer(serverName: string): MCPServerConnection | undefined {
-        return this.servers.get(serverName);
-    }
-
-    /**
+    }    /**
      * Disconnect all servers
      */
     async disconnectAll(): Promise<void> {
@@ -147,20 +125,13 @@ export class MCPManager {
         this.toolToServerMap.clear();
         this.allTools = [];
         console.log('\n✅ All connections closed');
-    }
-
-    /**
+    }    /**
      * Display statistics
      */
-    displayStats() {
-        const stats = {
-            serverCount: this.servers.size,
-            toolCount: this.allTools.length,
-            servers: this.getConnectedServers(),
-        };
+    displayStats(): void {
         console.log(`\n📊 MCP Manager Statistics:`);
-        console.log(`   - Connected Servers: ${stats.serverCount}`);
-        console.log(`   - Loaded Tools: ${stats.toolCount}`);
-        console.log(`   - Server List: ${stats.servers.join(', ')}`);
+        console.log(`   - Connected Servers: ${this.servers.size}`);
+        console.log(`   - Loaded Tools: ${this.allTools.length}`);
+        console.log(`   - Server List: ${Array.from(this.servers.keys()).join(', ')}`);
     }
 }

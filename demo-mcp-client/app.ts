@@ -10,7 +10,9 @@ import {
     Agent,
     loadMCPConfig,
     displayWelcome,
-    startInteractiveChatLoop
+    startInteractiveChatLoopStream,
+    startInteractiveChatLoop,
+    getDefaultModel
 } from './src/index';
 
 /**
@@ -27,15 +29,22 @@ async function main() {
         // Display statistics
         mcpManager.displayStats();
 
-        // Create Agent with all MCP tools
+        // Create Agent with all MCP tools (using env variables)
         const agent = new Agent(mcpManager, {
-            model: 'gemini-2.5-flash-preview-05-20',
+            model: getDefaultModel(),
         });
 
+        console.log(`\n📝 Using model: ${getDefaultModel()}`);
+
         // Start interactive chat
-        await startInteractiveChatLoop(async (message) => {
-            await agent.chat(message);
+        await startInteractiveChatLoopStream((message) => {
+            return agent.chatStream(message);
         });
+
+
+        // await startInteractiveChatLoop(async (message) => {
+        //     await agent.chat(message);
+        // });
 
         // Cleanup
         await mcpManager.disconnectAll();
