@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Research Agent - 智能研究助手</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      .header {
+        text-align: center;
+        color: white;
+        margin-bottom: 30px;
+      }
+
+      .header h1 {
+        font-size: 42px;
+        margin-bottom: 10px;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      }
+
+      .header p {
+        font-size: 18px;
+        opacity: 0.9;
+      }
+
+      .main-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+
+      @media (max-width: 1024px) {
+        .main-content {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .panel {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+      }
+
+      .panel-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        font-size: 20px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .panel-body {
+        padding: 20px;
+      }
+
+      .input-section {
+        margin-bottom: 20px;
+      }
+
+      .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .input-group label {
+        font-weight: bold;
+        color: #333;
+        font-size: 14px;
+      }
+
+      .input-group textarea {
+        width: 100%;
+        padding: 15px;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 16px;
+        font-family: inherit;
+        resize: vertical;
+        min-height: 120px;
+        transition: border-color 0.3s;
+      }
+
+      .input-group textarea:focus {
+        outline: none;
+        border-color: #667eea;
+      }
+
+      .btn {
+        padding: 15px 30px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        justify-content: center;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        width: 100%;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+      }
+
+      .btn-primary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: bold;
+        margin-bottom: 15px;
+      }
+
+      .status-badge.idle {
+        background: #e5e7eb;
+        color: #6b7280;
+      }
+
+      .status-badge.running {
+        background: #dbeafe;
+        color: #1e40af;
+        animation: pulse 2s infinite;
+      }
+
+      .status-badge.completed {
+        background: #d1fae5;
+        color: #065f46;
+      }
+
+      .status-badge.failed {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.7;
+        }
+      }
+
+      .timeline {
+        max-height: 500px;
+        overflow-y: auto;
+        padding: 10px;
+        background: #f9fafb;
+        border-radius: 8px;
+      }
+
+      .timeline-item {
+        padding: 12px;
+        margin-bottom: 10px;
+        background: white;
+        border-left: 4px solid #667eea;
+        border-radius: 6px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        animation: slideIn 0.3s ease-out;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .timeline-item.thinking {
+        border-left-color: #fbbf24;
+      }
+
+      .timeline-item.success {
+        border-left-color: #10b981;
+      }
+
+      .timeline-item.error {
+        border-left-color: #ef4444;
+      }
+
+      .timeline-item-time {
+        font-size: 11px;
+        color: #9ca3af;
+        margin-bottom: 4px;
+      }
+
+      .timeline-item-message {
+        color: #374151;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .terminal {
+        background: #1e1e1e;
+        color: #d4d4d4;
+        padding: 20px;
+        border-radius: 8px;
+        font-family: "Courier New", monospace;
+        font-size: 13px;
+        max-height: 400px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        word-break: break-all;
+      }
+
+      .terminal-line {
+        margin-bottom: 4px;
+        line-height: 1.6;
+      }
+
+      .terminal-line.command {
+        color: #60a5fa;
+        font-weight: bold;
+      }
+
+      .terminal-line.output {
+        color: #d4d4d4;
+      }
+
+      .terminal-line.error {
+        color: #f87171;
+      }
+
+      .terminal-line.success {
+        color: #34d399;
+      }
+
+      .report-section {
+        display: none;
+        padding: 20px;
+        background: #f9fafb;
+        border-radius: 8px;
+        margin-top: 20px;
+      }
+
+      .report-section.show {
+        display: block;
+      }
+
+      .report-title {
+        font-size: 24px;
+        font-weight: bold;
+        color: #111827;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 3px solid #667eea;
+      }
+
+      .report-content {
+        color: #374151;
+        line-height: 1.8;
+        font-size: 15px;
+      }
+
+      .report-content h2 {
+        color: #111827;
+        margin-top: 20px;
+        margin-bottom: 10px;
+      }
+
+      .report-content h3 {
+        color: #374151;
+        margin-top: 15px;
+        margin-bottom: 8px;
+      }
+
+      .report-content p {
+        margin-bottom: 12px;
+      }
+
+      .report-content ul,
+      .report-content ol {
+        margin-left: 25px;
+        margin-bottom: 12px;
+      }
+
+      .loading {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: #9ca3af;
+      }
+
+      .empty-state-icon {
+        font-size: 48px;
+        margin-bottom: 10px;
+      }
+
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: #555;
+      }
+
+      .connection-status {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+      }
+
+      .connection-status.connected {
+        background: #10b981;
+        color: white;
+      }
+
+      .connection-status.disconnected {
+        background: #ef4444;
+        color: white;
+      }
+
+      .status-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: white;
+        animation: pulse 2s infinite;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="connection-status" id="connectionStatus">
+      <div class="status-dot"></div>
+      <span id="connectionText">连接中...</span>
+    </div>
+
+    <div class="container">
+      <div class="header">
+        <h1>🤖 AI Research Agent</h1>
+        <p>智能研究助手 - 让 AI Agent 帮您深度研究任何问题</p>
+      </div>
+
+      <div class="main-content">
+        <!-- 左侧：输入和任务状态 -->
+        <div class="panel">
+          <div class="panel-header">
+            <span>📝</span>
+            <span>研究任务</span>
+          </div>
+          <div class="panel-body">
+            <div class="input-section">
+              <div class="input-group">
+                <label for="queryInput">您想研究什么问题？</label>
+                <textarea
+                  id="queryInput"
+                  placeholder="例如：分析 Spring Boot 3 的新特性&#10;或：调研 Docker 容器化最佳实践&#10;或：收集人工智能在医疗领域的应用案例"
+                ></textarea>
+              </div>
+              <button
+                class="btn btn-primary"
+                id="startBtn"
+                onclick="startResearch()"
+              >
+                <span>🚀</span>
+                <span>开始研究</span>
+              </button>
+            </div>
+
+            <div id="statusSection" style="display: none">
+              <div class="status-badge idle" id="statusBadge">
+                <span id="statusIcon">⏸️</span>
+                <span id="statusText">空闲</span>
+              </div>
+              <div class="timeline" id="timeline">
+                <div class="empty-state">
+                  <div class="empty-state-icon">🎯</div>
+                  <p>Agent 思考和操作记录将在这里显示</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右侧：虚拟机终端 -->
+        <div class="panel">
+          <div class="panel-header">
+            <span>💻</span>
+            <span>虚拟机终端</span>
+          </div>
+          <div class="panel-body">
+            <div class="terminal" id="terminal">
+              <div class="terminal-line">AI Research Agent 虚拟机终端</div>
+              <div class="terminal-line">═══════════════════════════════</div>
+              <div class="terminal-line">等待 Agent 开始工作...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 研究报告区域 -->
+      <div class="panel report-section" id="reportSection">
+        <div class="panel-header">
+          <span>📊</span>
+          <span>研究报告</span>
+        </div>
+        <div class="panel-body">
+          <div class="report-title" id="reportTitle"></div>
+          <div class="report-content" id="reportContent"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let ws = null;
+      let currentTaskId = null;
+      let isResearching = false;
+
+      // 连接 WebSocket
+      function connectWebSocket() {
+        ws = new WebSocket("ws://localhost:8081/ws/agent");
+
+        ws.onopen = () => {
+          updateConnectionStatus(true);
+          console.log("WebSocket 连接成功");
+        };
+
+        ws.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            handleWebSocketMessage(data);
+          } catch (e) {
+            console.error("解析消息失败:", e);
+          }
+        };
+
+        ws.onerror = (error) => {
+          updateConnectionStatus(false);
+          console.error("WebSocket 错误:", error);
+        };
+
+        ws.onclose = () => {
+          updateConnectionStatus(false);
+          console.log("WebSocket 连接关闭，5秒后重连...");
+          setTimeout(connectWebSocket, 5000);
+        };
+      }
+
+      // 更新连接状态
+      function updateConnectionStatus(connected) {
+        const status = document.getElementById("connectionStatus");
+        const text = document.getElementById("connectionText");
+
+        if (connected) {
+          status.className = "connection-status connected";
+          text.textContent = "WebSocket 已连接";
+        } else {
+          status.className = "connection-status disconnected";
+          text.textContent = "WebSocket 未连接";
+        }
+      }
+
+      // 处理 WebSocket 消息
+      function handleWebSocketMessage(data) {
+        const { type, taskId, message, output, report } = data;
+
+        // 只处理当前任务的消息
+        if (taskId && taskId !== currentTaskId) return;
+
+        switch (type) {
+          case "TASK_UPDATE":
+            addTimelineItem(message, "thinking");
+            updateStatus(data.status);
+            break;
+
+          case "VM_OPERATION":
+            addTerminalLine(message, "command");
+            break;
+
+          case "VM_OUTPUT":
+            addTerminalLine(output, "output");
+            break;
+
+          case "FINAL_REPORT":
+            showReport(report);
+            isResearching = false;
+            updateButtonState();
+            addTimelineItem("✨ 研究报告已生成！", "success");
+            break;
+        }
+      }
+
+      // 开始研究
+      async function startResearch() {
+        const query = document.getElementById("queryInput").value.trim();
+
+        if (!query) {
+          alert("请输入您想研究的问题");
+          return;
+        }
+
+        if (isResearching) {
+          return;
+        }
+
+        isResearching = true;
+        updateButtonState();
+
+        // 清空之前的内容
+        document.getElementById("timeline").innerHTML = "";
+        document.getElementById("terminal").innerHTML =
+          '<div class="terminal-line">Agent 正在启动...</div>';
+        document.getElementById("reportSection").classList.remove("show");
+        document.getElementById("statusSection").style.display = "block";
+
+        try {
+          const response = await fetch(
+            "http://localhost:8080/api/agent/research",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ query }),
+            }
+          );
+
+          const result = await response.json();
+
+          if (result.success) {
+            currentTaskId = result.taskId;
+            addTimelineItem("🎯 任务已创建: " + result.taskId, "success");
+            addTimelineItem(result.message, "thinking");
+          } else {
+            alert("创建任务失败: " + result.message);
+            isResearching = false;
+            updateButtonState();
+          }
+        } catch (error) {
+          alert("请求失败: " + error.message);
+          isResearching = false;
+          updateButtonState();
+        }
+      }
+
+      // 添加时间线项目
+      function addTimelineItem(message, type = "") {
+        const timeline = document.getElementById("timeline");
+        const item = document.createElement("div");
+        item.className = "timeline-item " + type;
+
+        const time = new Date().toLocaleTimeString("zh-CN");
+
+        item.innerHTML = `
+                <div class="timeline-item-time">${time}</div>
+                <div class="timeline-item-message">${message}</div>
+            `;
+
+        timeline.appendChild(item);
+        timeline.scrollTop = timeline.scrollHeight;
+      }
+
+      // 添加终端行
+      function addTerminalLine(text, type = "") {
+        const terminal = document.getElementById("terminal");
+        const line = document.createElement("div");
+        line.className = "terminal-line " + type;
+        line.textContent = text;
+        terminal.appendChild(line);
+        terminal.scrollTop = terminal.scrollHeight;
+      }
+
+      // 更新状态
+      function updateStatus(status) {
+        const badge = document.getElementById("statusBadge");
+        const icon = document.getElementById("statusIcon");
+        const text = document.getElementById("statusText");
+
+        badge.className = "status-badge " + status.toLowerCase();
+
+        switch (status) {
+          case "CREATED":
+            icon.textContent = "⏸️";
+            text.textContent = "已创建";
+            break;
+          case "RUNNING":
+            icon.textContent = "⚡";
+            text.textContent = "运行中";
+            break;
+          case "COMPLETED":
+            icon.textContent = "✅";
+            text.textContent = "已完成";
+            break;
+          case "FAILED":
+            icon.textContent = "❌";
+            text.textContent = "失败";
+            break;
+        }
+      }
+
+      // 显示研究报告
+      function showReport(report) {
+        const section = document.getElementById("reportSection");
+        const title = document.getElementById("reportTitle");
+        const content = document.getElementById("reportContent");
+
+        title.textContent = "研究报告";
+
+        // 将 Markdown 风格的文本转换为 HTML
+        const htmlContent = report
+          .replace(/\n/g, "<br>")
+          .replace(/#{3}\s+(.+?)(<br>|$)/g, "<h3>$1</h3>")
+          .replace(/#{2}\s+(.+?)(<br>|$)/g, "<h2>$1</h2>")
+          .replace(/#{1}\s+(.+?)(<br>|$)/g, "<h2>$1</h2>")
+          .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+          .replace(/\*(.+?)\*/g, "<em>$1</em>");
+
+        content.innerHTML = htmlContent;
+        section.classList.add("show");
+      }
+
+      // 更新按钮状态
+      function updateButtonState() {
+        const btn = document.getElementById("startBtn");
+        const btnText = btn.querySelector("span:last-child");
+
+        if (isResearching) {
+          btn.disabled = true;
+          btnText.textContent = "研究进行中...";
+          btn.querySelector("span:first-child").innerHTML =
+            '<div class="loading"></div>';
+        } else {
+          btn.disabled = false;
+          btnText.textContent = "开始研究";
+          btn.querySelector("span:first-child").textContent = "🚀";
+        }
+      }
+
+      // 页面加载完成后连接
+      window.onload = () => {
+        connectWebSocket();
+      };
+    </script>
+  </body>
+</html>

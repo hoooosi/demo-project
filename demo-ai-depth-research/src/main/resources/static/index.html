@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Research Agent - 智能研究助手</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px 30px;
+      }
+
+      .header h1 {
+        font-size: 24px;
+        margin-bottom: 10px;
+      }
+
+      .status {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 14px;
+      }
+
+      .status-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #4ade80;
+        animation: pulse 2s infinite;
+      }
+
+      .status-dot.disconnected {
+        background: #ef4444;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      .content {
+        padding: 30px;
+      }
+
+      .control-panel {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+
+      .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .btn-primary {
+        background: #667eea;
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: #5568d3;
+      }
+
+      .btn-danger {
+        background: #ef4444;
+        color: white;
+      }
+
+      .btn-danger:hover {
+        background: #dc2626;
+      }
+
+      .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .terminal {
+        background: #1e1e1e;
+        color: #d4d4d4;
+        border-radius: 5px;
+        padding: 20px;
+        font-family: "Courier New", monospace;
+        font-size: 14px;
+        height: 400px;
+        overflow-y: auto;
+        margin-bottom: 20px;
+      }
+
+      .terminal-line {
+        margin-bottom: 5px;
+        line-height: 1.5;
+      }
+
+      .terminal-line.info {
+        color: #4ade80;
+      }
+
+      .terminal-line.error {
+        color: #ef4444;
+      }
+
+      .terminal-line.warning {
+        color: #fbbf24;
+      }
+
+      .terminal-line.command {
+        color: #60a5fa;
+      }
+
+      .input-group {
+        display: flex;
+        gap: 10px;
+      }
+
+      .input-group input {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #e5e7eb;
+        border-radius: 5px;
+        font-size: 14px;
+      }
+
+      .input-group input:focus {
+        outline: none;
+        border-color: #667eea;
+      }
+
+      .vm-info {
+        background: #f3f4f6;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+      }
+
+      .vm-info-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        font-size: 14px;
+      }
+
+      .vm-info-item:last-child {
+        margin-bottom: 0;
+      }
+
+      .vm-info-label {
+        font-weight: bold;
+        color: #6b7280;
+      }
+
+      .vm-info-value {
+        color: #111827;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🤖 Agent 虚拟机控制台</h1>
+        <div class="status">
+          <div class="status-dot" id="statusDot"></div>
+          <span id="statusText">WebSocket 连接中...</span>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="control-panel">
+          <button class="btn btn-primary" id="createVmBtn" onclick="createVm()">
+            🚀 创建虚拟机
+          </button>
+          <button
+            class="btn btn-danger"
+            id="destroyVmBtn"
+            onclick="destroyVm()"
+            disabled
+          >
+            🗑️ 销毁虚拟机
+          </button>
+          <button class="btn btn-primary" onclick="getVmStatus()">
+            📊 刷新状态
+          </button>
+        </div>
+
+        <div class="vm-info" id="vmInfo" style="display: none">
+          <div class="vm-info-item">
+            <span class="vm-info-label">虚拟机状态:</span>
+            <span class="vm-info-value" id="vmStatus">-</span>
+          </div>
+          <div class="vm-info-item">
+            <span class="vm-info-label">容器 ID:</span>
+            <span class="vm-info-value" id="containerId">-</span>
+          </div>
+        </div>
+
+        <div class="terminal" id="terminal">
+          <div class="terminal-line info">欢迎使用 Agent 虚拟机控制台</div>
+          <div class="terminal-line info">请先点击"创建虚拟机"按钮开始</div>
+        </div>
+
+        <div class="input-group">
+          <input
+            type="text"
+            id="commandInput"
+            placeholder="输入要执行的命令，例如: ls -la"
+            onkeypress="handleKeyPress(event)"
+            disabled
+          />
+          <button
+            class="btn btn-primary"
+            id="executeBtn"
+            onclick="executeCommand()"
+            disabled
+          >
+            ▶️ 执行
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let ws = null;
+      let vmCreated = false;
+
+      // 连接 WebSocket
+      function connectWebSocket() {
+        ws = new WebSocket("ws://localhost:8081/ws/agent");
+
+        ws.onopen = () => {
+          updateStatus(true);
+          addTerminalLine("WebSocket 连接成功", "info");
+        };
+
+        ws.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            handleWebSocketMessage(data);
+          } catch (e) {
+            console.error("解析消息失败:", e);
+          }
+        };
+
+        ws.onerror = (error) => {
+          updateStatus(false);
+          addTerminalLine("WebSocket 连接错误", "error");
+        };
+
+        ws.onclose = () => {
+          updateStatus(false);
+          addTerminalLine("WebSocket 连接已关闭，5秒后重连...", "warning");
+          setTimeout(connectWebSocket, 5000);
+        };
+      }
+
+      // 处理 WebSocket 消息
+      function handleWebSocketMessage(data) {
+        const { type, message, data: msgData } = data;
+
+        switch (type) {
+          case "CONNECTED":
+            addTerminalLine("✓ " + message, "info");
+            break;
+
+          case "VM_CREATING":
+            addTerminalLine("⏳ " + message, "info");
+            break;
+
+          case "VM_CREATED":
+            addTerminalLine("✓ " + message, "info");
+            if (msgData && msgData.containerId) {
+              addTerminalLine("容器 ID: " + msgData.containerId, "info");
+            }
+            vmCreated = true;
+            updateButtons();
+            getVmStatus();
+            break;
+
+          case "VM_DESTROYING":
+            addTerminalLine("⏳ " + message, "warning");
+            break;
+
+          case "VM_DESTROYED":
+            addTerminalLine("✓ " + message, "info");
+            vmCreated = false;
+            updateButtons();
+            getVmStatus();
+            break;
+
+          case "VM_ERROR":
+            addTerminalLine("✗ " + message, "error");
+            break;
+
+          case "COMMAND_START":
+            if (msgData && msgData.command) {
+              addTerminalLine("$ " + msgData.command, "command");
+            }
+            break;
+
+          case "COMMAND_OUTPUT":
+            const stream = msgData?.stream || "stdout";
+            const style = stream === "stderr" ? "error" : "";
+            addTerminalLine(message, style);
+            break;
+
+          case "COMMAND_COMPLETE":
+            const exitCode = msgData?.exitCode || 0;
+            const success = msgData?.success || false;
+            const statusText = success ? "✓ 命令执行成功" : "✗ 命令执行失败";
+            addTerminalLine(
+              statusText + " (退出码: " + exitCode + ")",
+              success ? "info" : "error"
+            );
+            addTerminalLine("", ""); // 空行
+            break;
+        }
+      }
+
+      // 添加终端输出
+      function addTerminalLine(text, className = "") {
+        const terminal = document.getElementById("terminal");
+        const line = document.createElement("div");
+        line.className = "terminal-line " + className;
+        line.textContent = text;
+        terminal.appendChild(line);
+        terminal.scrollTop = terminal.scrollHeight;
+      }
+
+      // 更新连接状态
+      function updateStatus(connected) {
+        const statusDot = document.getElementById("statusDot");
+        const statusText = document.getElementById("statusText");
+
+        if (connected) {
+          statusDot.classList.remove("disconnected");
+          statusText.textContent = "WebSocket 已连接";
+        } else {
+          statusDot.classList.add("disconnected");
+          statusText.textContent = "WebSocket 未连接";
+        }
+      }
+
+      // 更新按钮状态
+      function updateButtons() {
+        document.getElementById("createVmBtn").disabled = vmCreated;
+        document.getElementById("destroyVmBtn").disabled = !vmCreated;
+        document.getElementById("commandInput").disabled = !vmCreated;
+        document.getElementById("executeBtn").disabled = !vmCreated;
+      }
+
+      // 创建虚拟机
+      async function createVm() {
+        try {
+          const response = await fetch(
+            "http://localhost:8080/api/agent/vm/create",
+            {
+              method: "POST",
+            }
+          );
+          const result = await response.json();
+
+          if (!result.success) {
+            addTerminalLine("✗ " + result.message, "error");
+          }
+        } catch (error) {
+          addTerminalLine("✗ 创建虚拟机失败: " + error.message, "error");
+        }
+      }
+
+      // 销毁虚拟机
+      async function destroyVm() {
+        if (!confirm("确定要销毁虚拟机吗？")) {
+          return;
+        }
+
+        try {
+          const response = await fetch(
+            "http://localhost:8080/api/agent/vm/destroy",
+            {
+              method: "POST",
+            }
+          );
+          const result = await response.json();
+
+          if (!result.success) {
+            addTerminalLine("✗ " + result.message, "error");
+          }
+        } catch (error) {
+          addTerminalLine("✗ 销毁虚拟机失败: " + error.message, "error");
+        }
+      }
+
+      // 执行命令
+      async function executeCommand() {
+        const input = document.getElementById("commandInput");
+        const command = input.value.trim();
+
+        if (!command) {
+          return;
+        }
+
+        input.value = "";
+
+        try {
+          const response = await fetch(
+            "http://localhost:8080/api/agent/vm/execute",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ command }),
+            }
+          );
+
+          const result = await response.json();
+
+          if (!result.success && result.message) {
+            addTerminalLine("✗ " + result.message, "error");
+          }
+        } catch (error) {
+          addTerminalLine("✗ 执行命令失败: " + error.message, "error");
+        }
+      }
+
+      // 获取虚拟机状态
+      async function getVmStatus() {
+        try {
+          const response = await fetch(
+            "http://localhost:8080/api/agent/vm/status"
+          );
+          const result = await response.json();
+
+          const vmInfo = document.getElementById("vmInfo");
+          vmInfo.style.display = "block";
+
+          document.getElementById("vmStatus").textContent = result.status;
+          document.getElementById("containerId").textContent =
+            result.containerId || "-";
+
+          vmCreated = result.occupied;
+          updateButtons();
+        } catch (error) {
+          console.error("获取状态失败:", error);
+        }
+      }
+
+      // 键盘事件
+      function handleKeyPress(event) {
+        if (event.key === "Enter") {
+          executeCommand();
+        }
+      }
+
+      // 页面加载完成后连接
+      window.onload = () => {
+        connectWebSocket();
+        getVmStatus();
+      };
+    </script>
+  </body>
+</html>
