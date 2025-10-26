@@ -1,0 +1,78 @@
+server:
+  port: ${SERVER_PORT:8080}
+  servlet:
+    context-path: /api
+  tomcat:
+    threads:
+      max: 200
+    connection-timeout: 2000000
+    max-connections: 10000
+    accept-count: 100
+rocketmq:
+  name-server: ${ROCKETMQ_SERVER:localhost:9876}
+  producer:
+    group: agent-plus-producer-group
+    send-message-timeout: 3000
+    retry-times-when-send-failed: 2
+spring:
+  application:
+    name: AgentPlus
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:agent-plus}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  type-aliases-package: io.github.hoooosi.agentplus
+  type-handlers-package: io.github.hoooosi.agentplus.infrastructure.converter
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted_at
+      logic-delete-value: now()
+      logic-not-delete-value: "null"
+    banner: false
+logging:
+  level:
+    root: info
+  file:
+    name: logs/agent-plus.log
+dromara:
+  x-file-storage:
+    default-platform: minio-1
+    thumbnail-suffix: ".min.jpg"
+    minio:
+      - platform: minio-1
+        enable-storage: true
+        access-key: ${MINIO_ACCESS_KEY:minio}
+        secret-key: ${MINIO_SECRET_KEY:12345678}
+        end-point: ${MINIO_ENDPOINT:http://localhost:9000}
+        bucket-name: ${MINIO_BUCKET_NAME:agent-plus}
+        domain: ${MINIO_DOMAIN:http://localhost:9000}
+        base-path: s3/
+mail:
+  smtp:
+    host: ${MAIL_SMTP_HOST:localhost}
+    port: ${MAIL_SMTP_PORT:587}
+    username: ${MAIL_SMTP_USERNAME:username}
+    password: ${MAIL_SMTP_PASSWORD:password}
+  verification:
+    subject: ${MAIL_VERIFICATION_SUBJECT:请验证您的邮箱}
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
+      packages-to-scan: 'io.github.hoooosi.agentplus.interfaces.api'
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn

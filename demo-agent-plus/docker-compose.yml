@@ -1,0 +1,82 @@
+version: "3.8"
+
+services:
+  # PostgreSQL
+  postgres:
+    container_name: postgres
+    image: postgres:14
+    restart: always
+    shm_size: 128mb
+    ports:
+      - "5432:5432"
+    volumes:
+      - "./data/postgres:/var/lib/postgresql/data"
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+
+  # Redis
+  redis:
+    container_name: redis
+    image: redis:7-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - "./config/redis.conf:/usr/local/etc/redis/redis.conf"
+      - "./data/redis:/data"
+    command: redis-server /usr/local/etc/redis/redis.conf
+
+  # MinIO
+  minio:
+    container_name: minio
+    image: minio/minio:latest
+    restart: always
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - "./data/minio/data:/data"
+      - "./data/minio/events:/tmp/minio-events"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+
+  # RocketMQ
+  rocketmq-dashboard:
+    image: apacherocketmq/rocketmq-dashboard:latest
+    container_name: rocket-dashboard
+    ports:
+      - "8082:8082"
+    environment:
+      - JAVA_OPTS=-Drocketmq.namesrv.addr=namesrv:9876
+
+  namesrv:
+    image: apache/rocketmq:5.3.2
+    container_name: namesrv
+    ports:
+      - "9876:9876"
+    volumes:
+      - "./data/namesrv/logs:/home/rocketmq/logs"
+      - "./data/namesrv/store:/home/rocketmq/store"
+    command: sh mqnamesrv
+
+  broker:
+    image: apache/rocketmq:5.3.2
+    container_name: broker
+    user: root
+    ports:
+      - "10909:10909"
+      - "10911:10911"
+      - "10912:10912"
+    volumes:
+      - "./data/broker/logs:/root/logs"
+      - "./data/broker/store:/root/store"
+      - "./config/broker.conf:/home/rocketmq/cfg/broker.conf"
+    environment:
+      - JAVA_OPTS=-server -Xms512m -Xmx512m -Xmn256m -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=128m
+    command: sh mqbroker -c /home/rocketmq/cfg/broker.conf
+    restart: always
+    depends_on:
+      - namesrv

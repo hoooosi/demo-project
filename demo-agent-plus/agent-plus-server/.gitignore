@@ -36,9 +36,4 @@ build/
 
 ### Mac OS ###
 .DS_Store
-
-
 .env
-data/
-.idea/
-logs/
