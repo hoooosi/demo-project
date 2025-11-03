@@ -1,7 +1,7 @@
 package io.github.hoooosi.agentplus.interfaces.dto.users.request;
 
 
-import io.github.hoooosi.agentplus.interfaces.dto.users.Page;
+import io.github.hoooosi.agentplus.interfaces.dto.common.Page;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

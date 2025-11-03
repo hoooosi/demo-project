@@ -4,16 +4,16 @@ import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import io.github.hoooosi.agentplus.domain.llm.enums.ProviderType;
+import io.github.hoooosi.agentplus.domain.llm.model.enums.ProviderType;
 import io.github.hoooosi.agentplus.domain.llm.event.*;
 import io.github.hoooosi.agentplus.domain.llm.model.ModelEntity;
 import io.github.hoooosi.agentplus.domain.llm.model.ProviderAggregate;
 import io.github.hoooosi.agentplus.domain.llm.repository.ModelRepository;
 import io.github.hoooosi.agentplus.domain.llm.repository.ProviderRepository;
-import io.github.hoooosi.agentplus.domain.user.service.model.ProviderEntity;
-import io.github.hoooosi.agentplus.domain.user.service.protocol.ProviderProtocol;
+import io.github.hoooosi.agentplus.domain.llm.model.ProviderEntity;
 import io.github.hoooosi.agentplus.infrastructure.entity.Operator;
 import io.github.hoooosi.agentplus.infrastructure.exception.BusinessException;
+import io.github.hoooosi.agentplus.infrastructure.llm.protocol.enums.ProviderProtocol;
 import lombok.AllArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -318,7 +318,7 @@ public class LLMDomainService {
     /** 修改服务商状态
      * @param providerId 服务商id
      * @param userId 用户id */
-    public void updateProviderStatus(String providerId, Long userId) {
+    public void updateProviderStatus(Long providerId, Long userId) {
         LambdaUpdateWrapper<ProviderEntity> updateWrapper = Wrappers.lambdaUpdate(ProviderEntity.class)
                 .eq(ProviderEntity::getId, providerId).eq(ProviderEntity::getUserId, userId)
                 .setSql("status = NOT status");

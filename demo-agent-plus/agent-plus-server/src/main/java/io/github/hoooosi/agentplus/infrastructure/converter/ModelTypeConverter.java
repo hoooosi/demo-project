@@ -1,7 +1,7 @@
 package io.github.hoooosi.agentplus.infrastructure.converter;
 
 
-import io.github.hoooosi.agentplus.domain.llm.enums.ModelType;
+import io.github.hoooosi.agentplus.domain.llm.model.enums.ModelType;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.MappedJdbcTypes;

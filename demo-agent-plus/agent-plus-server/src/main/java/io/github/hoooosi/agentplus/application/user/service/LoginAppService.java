@@ -3,7 +3,7 @@ package io.github.hoooosi.agentplus.application.user.service;
 import io.github.hoooosi.agentplus.domain.auth.constant.AuthFeatureKey;
 import io.github.hoooosi.agentplus.domain.user.service.UserDomainService;
 import io.github.hoooosi.agentplus.domain.auth.service.AuthSettingDomainService;
-import io.github.hoooosi.agentplus.domain.user.service.model.UserEntity;
+import io.github.hoooosi.agentplus.domain.user.model.UserEntity;
 import io.github.hoooosi.agentplus.infrastructure.email.EmailService;
 import io.github.hoooosi.agentplus.infrastructure.utils.JwtUtils;
 import io.github.hoooosi.agentplus.infrastructure.verification.VerificationCodeService;

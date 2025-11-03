@@ -3,10 +3,10 @@ package io.github.hoooosi.agentplus.domain.user.service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import io.github.hoooosi.agentplus.domain.user.service.model.UserEntity;
-import io.github.hoooosi.agentplus.domain.user.service.model.UserSettingsEntity;
-import io.github.hoooosi.agentplus.domain.user.service.repository.UserRepository;
-import io.github.hoooosi.agentplus.domain.user.service.repository.UserSettingsRepository;
+import io.github.hoooosi.agentplus.domain.user.model.UserEntity;
+import io.github.hoooosi.agentplus.domain.user.model.UserSettingsEntity;
+import io.github.hoooosi.agentplus.domain.user.repository.UserRepository;
+import io.github.hoooosi.agentplus.domain.user.repository.UserSettingsRepository;
 import io.github.hoooosi.agentplus.infrastructure.utils.PasswordUtils;
 import io.github.hoooosi.agentplus.interfaces.dto.users.request.QueryUserRequest;
 import io.github.hoooosi.agentplus.infrastructure.exception.BusinessException;
@@ -68,10 +68,10 @@ public class UserDomainService {
         // 设置普通登录平台
         userEntity.setLoginPlatform("normal");
 
-        //userRepository.checkInsert(userEntity);
+        userRepository.checkInsert(userEntity);
         UserSettingsEntity userSettingsEntity = new UserSettingsEntity();
         userSettingsEntity.setUserId(userEntity.getId());
-        // settingsRepository.insert(userSettingsEntity);
+        settingsRepository.insert(userSettingsEntity);
         return userEntity;
     }
 
@@ -164,8 +164,8 @@ public class UserDomainService {
         userRepository.insert(user);
 
         // 创建用户设置
-        UserSettingsEntity userSettingsEntity = new UserSettingsEntity();
-        userSettingsEntity.setUserId(user.getId());
+        UserSettingsEntity userSettingsEntity = new UserSettingsEntity()
+                .setUserId(user.getId());
         settingsRepository.insert(userSettingsEntity);
     }
 

@@ -1,6 +1,6 @@
 package io.github.hoooosi.agentplus.application.llm.dto;
 
-import io.github.hoooosi.agentplus.domain.llm.enums.ModelType;
+import io.github.hoooosi.agentplus.domain.llm.model.enums.ModelType;
 import lombok.Data;
 import lombok.experimental.Accessors;
 

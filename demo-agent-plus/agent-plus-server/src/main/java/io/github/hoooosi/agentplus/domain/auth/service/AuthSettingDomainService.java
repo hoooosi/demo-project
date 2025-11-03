@@ -53,10 +53,9 @@ public class AuthSettingDomainService {
      * @param featureKey 功能键
      * @return 是否启用 */
     public boolean isFeatureEnabled(AuthFeatureKey featureKey) {
-        LambdaQueryWrapper<AuthSettingEntity> wrapper = Wrappers.<AuthSettingEntity>lambdaQuery()
+        return authSettingRepository.selectCount(Wrappers.<AuthSettingEntity>lambdaQuery()
                 .eq(AuthSettingEntity::getFeatureKey, featureKey.getCode())
-                .eq(AuthSettingEntity::getEnabled, true);
-        return authSettingRepository.selectCount(wrapper) > 0;
+                .eq(AuthSettingEntity::getEnabled, true)) > 0;
     }
 
     /** 根据功能键获取认证配置
@@ -71,7 +70,7 @@ public class AuthSettingDomainService {
     /** 根据ID获取认证配置
      * @param id 配置ID
      * @return 认证配置实体 */
-    public AuthSettingEntity getById(String id) {
+    public AuthSettingEntity getById(Long id) {
         AuthSettingEntity entity = authSettingRepository.selectById(id);
         if (entity == null) {
             throw new BusinessException("认证配置不存在");
@@ -82,7 +81,7 @@ public class AuthSettingDomainService {
     /** 切换功能启用状态
      * @param id 配置ID
      * @return 更新后的配置 */
-    public AuthSettingEntity toggleEnabled(String id) {
+    public AuthSettingEntity toggleEnabled(Long id) {
         AuthSettingEntity entity = getById(id);
 
         LambdaUpdateWrapper<AuthSettingEntity> updateWrapper = Wrappers.<AuthSettingEntity>lambdaUpdate()
@@ -127,7 +126,7 @@ public class AuthSettingDomainService {
 
     /** 删除认证配置
      * @param id 配置ID */
-    public void deleteAuthSetting(String id) {
+    public void deleteAuthSetting(Long id) {
         AuthSettingEntity entity = getById(id);
         authSettingRepository.deleteById(id);
     }

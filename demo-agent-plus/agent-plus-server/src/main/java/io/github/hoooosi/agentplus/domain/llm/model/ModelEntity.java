@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import io.github.hoooosi.agentplus.domain.llm.enums.ModelType;
+import io.github.hoooosi.agentplus.domain.llm.model.enums.ModelType;
 import io.github.hoooosi.agentplus.infrastructure.converter.ModelTypeConverter;
 import io.github.hoooosi.agentplus.infrastructure.entity.BaseEntity;
 import lombok.Data;

@@ -28,7 +28,7 @@
         <fastjson.version>2.0.47</fastjson.version>
         <hutool.version>5.8.26</hutool.version>
         <httpclient.version>4.5.14</httpclient.version>
-        <langchain4j.version>1.0.4.3-beta7-SNAPSHOT</langchain4j.version>
+        <langchain4j.version>1.8.0</langchain4j.version>
         <spotless.version>2.37.0</spotless.version>
         <x-file-storage.version>2.2.0</x-file-storage.version>
         <pdf-box>3.0.2</pdf-box>
@@ -38,6 +38,7 @@
         <forest.version>1.7.1</forest.version>
         <knife4j.version>4.4.0</knife4j.version>
         <rocketmq-spring-boot.version>2.3.0</rocketmq-spring-boot.version>
+        <flexmark.version>0.64.8</flexmark.version>
     </properties>
 
     <pluginRepositories>
@@ -78,6 +79,14 @@
                 <artifactId>commons-io</artifactId>
                 <version>${commons-io.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>dev.langchain4j</groupId>
+                <artifactId>langchain4j-bom</artifactId>
+                <version>${langchain4j.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -99,6 +108,28 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
+        </dependency>
+
+        <!-- dev.langchain4j -->
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-open-ai</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-document-parser-apache-poi</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-pgvector</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-anthropic</artifactId>
         </dependency>
 
         <!-- ENV -->
@@ -154,6 +185,11 @@
 
         <!-- 工具库 -->
         <dependency>
+            <groupId>com.dtflys.forest</groupId>
+            <artifactId>forest-spring-boot3-starter</artifactId>
+            <version>${forest.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
             <version>${fastjson.version}</version>
@@ -166,7 +202,6 @@
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
-
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-crypto</artifactId>
@@ -178,8 +213,18 @@
             <version>${hutool.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>${pdf-box}</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.vladsch.flexmark</groupId>
+            <artifactId>flexmark-all</artifactId>
+            <version>${flexmark.version}</version>
         </dependency>
 
         <!-- Jakarta Mail -->

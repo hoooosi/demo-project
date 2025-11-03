@@ -1,7 +1,6 @@
 package io.github.hoooosi.agentplus.domain.sso.model;
 
 import lombok.Getter;
-import org.springframework.stereotype.Component;
 
 @Getter
 public enum SsoProvider {

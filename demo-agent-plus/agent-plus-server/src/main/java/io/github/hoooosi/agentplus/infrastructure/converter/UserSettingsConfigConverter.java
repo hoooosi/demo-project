@@ -1,6 +1,6 @@
 package io.github.hoooosi.agentplus.infrastructure.converter;
 
-import io.github.hoooosi.agentplus.domain.user.service.model.config.UserSettingsConfig;
+import io.github.hoooosi.agentplus.domain.user.model.config.UserSettingsConfig;
 import io.github.hoooosi.agentplus.infrastructure.utils.JsonUtils;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;

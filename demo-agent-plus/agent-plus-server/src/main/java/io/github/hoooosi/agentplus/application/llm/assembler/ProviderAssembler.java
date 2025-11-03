@@ -4,11 +4,10 @@ import io.github.hoooosi.agentplus.application.llm.dto.ModelDTO;
 import io.github.hoooosi.agentplus.application.llm.dto.ProviderDTO;
 import io.github.hoooosi.agentplus.domain.llm.model.ModelEntity;
 import io.github.hoooosi.agentplus.domain.llm.model.ProviderAggregate;
-import io.github.hoooosi.agentplus.domain.user.service.model.ProviderEntity;
-import io.github.hoooosi.agentplus.interfaces.dto.users.llm.request.ProviderCreateRequest;
-import io.github.hoooosi.agentplus.interfaces.dto.users.llm.request.ProviderUpdateRequest;
+import io.github.hoooosi.agentplus.domain.llm.model.ProviderEntity;
+import io.github.hoooosi.agentplus.interfaces.dto.llm.request.ProviderCreateRequest;
+import io.github.hoooosi.agentplus.interfaces.dto.llm.request.ProviderUpdateRequest;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 

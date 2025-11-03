@@ -4,7 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum FeatureType {
-    LOGIN("LOGIN", "登录功能"), REGISTER("REGISTER", "注册功能");
+    LOGIN("LOGIN", "登录功能"),
+    REGISTER("REGISTER", "注册功能");
 
     private final String code;
     private final String name;

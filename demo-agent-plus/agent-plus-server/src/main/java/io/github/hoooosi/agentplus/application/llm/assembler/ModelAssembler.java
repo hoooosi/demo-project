@@ -2,8 +2,8 @@ package io.github.hoooosi.agentplus.application.llm.assembler;
 
 import io.github.hoooosi.agentplus.application.llm.dto.ModelDTO;
 import io.github.hoooosi.agentplus.domain.llm.model.ModelEntity;
-import io.github.hoooosi.agentplus.interfaces.dto.users.llm.request.ModelCreateRequest;
-import io.github.hoooosi.agentplus.interfaces.dto.users.llm.request.ModelUpdateRequest;
+import io.github.hoooosi.agentplus.interfaces.dto.llm.request.ModelCreateRequest;
+import io.github.hoooosi.agentplus.interfaces.dto.llm.request.ModelUpdateRequest;
 import org.springframework.util.ObjectUtils;
 
 import java.util.Collections;

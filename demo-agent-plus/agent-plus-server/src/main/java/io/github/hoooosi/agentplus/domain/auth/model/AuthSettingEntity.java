@@ -1,7 +1,6 @@
 package io.github.hoooosi.agentplus.domain.auth.model;
 
 
-
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -20,7 +19,7 @@ import java.util.Map;
 public class AuthSettingEntity extends BaseEntity {
 
     @TableId(type = IdType.ASSIGN_ID)
-    private String id;
+    private Long id;
     private String featureType;
     private String featureKey;
     private String featureName;

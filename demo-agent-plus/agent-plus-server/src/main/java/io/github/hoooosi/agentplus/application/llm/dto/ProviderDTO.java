@@ -1,11 +1,10 @@
 package io.github.hoooosi.agentplus.application.llm.dto;
 
-import io.github.hoooosi.agentplus.domain.llm.config.ProviderConfig;
-import io.github.hoooosi.agentplus.domain.user.service.protocol.ProviderProtocol;
+import io.github.hoooosi.agentplus.domain.llm.model.config.ProviderConfig;
+import io.github.hoooosi.agentplus.domain.user.protocol.ProviderProtocol;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 

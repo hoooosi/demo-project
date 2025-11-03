@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.github.hoooosi.agentplus.application.user.assembler.UserAssembler;
 import io.github.hoooosi.agentplus.application.user.dto.UserDTO;
 import io.github.hoooosi.agentplus.domain.user.service.UserDomainService;
-import io.github.hoooosi.agentplus.domain.user.service.model.UserEntity;
+import io.github.hoooosi.agentplus.domain.user.model.UserEntity;
 import io.github.hoooosi.agentplus.interfaces.dto.users.request.ChangePasswordRequest;
 import io.github.hoooosi.agentplus.interfaces.dto.users.request.QueryUserRequest;
 import io.github.hoooosi.agentplus.interfaces.dto.users.request.UserUpdateRequest;

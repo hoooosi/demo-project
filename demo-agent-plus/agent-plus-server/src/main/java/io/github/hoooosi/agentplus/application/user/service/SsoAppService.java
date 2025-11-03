@@ -4,7 +4,7 @@ import io.github.hoooosi.agentplus.domain.sso.model.SsoProvider;
 import io.github.hoooosi.agentplus.domain.sso.model.SsoUserInfo;
 import io.github.hoooosi.agentplus.domain.sso.service.SsoService;
 import io.github.hoooosi.agentplus.domain.user.service.UserDomainService;
-import io.github.hoooosi.agentplus.domain.user.service.model.UserEntity;
+import io.github.hoooosi.agentplus.domain.user.model.UserEntity;
 import io.github.hoooosi.agentplus.infrastructure.sso.SsoServiceFactory;
 import io.github.hoooosi.agentplus.infrastructure.utils.JwtUtils;
 import io.github.hoooosi.agentplus.infrastructure.utils.PasswordUtils;

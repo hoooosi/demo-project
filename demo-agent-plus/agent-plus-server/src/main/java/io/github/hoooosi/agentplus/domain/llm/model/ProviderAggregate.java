@@ -1,7 +1,6 @@
 package io.github.hoooosi.agentplus.domain.llm.model;
 
-import io.github.hoooosi.agentplus.domain.llm.config.ProviderConfig;
-import io.github.hoooosi.agentplus.domain.user.service.model.ProviderEntity;
+import io.github.hoooosi.agentplus.domain.llm.model.config.ProviderConfig;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

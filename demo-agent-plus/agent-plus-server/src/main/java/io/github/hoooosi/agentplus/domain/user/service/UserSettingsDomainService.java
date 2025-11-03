@@ -1,11 +1,9 @@
 package io.github.hoooosi.agentplus.domain.user.service;
 
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import io.github.hoooosi.agentplus.domain.user.service.model.UserSettingsEntity;
-import io.github.hoooosi.agentplus.domain.user.service.model.config.FallbackConfig;
-import io.github.hoooosi.agentplus.domain.user.service.repository.UserSettingsRepository;
+import io.github.hoooosi.agentplus.domain.user.model.UserSettingsEntity;
+import io.github.hoooosi.agentplus.domain.user.model.config.FallbackConfig;
+import io.github.hoooosi.agentplus.domain.user.repository.UserSettingsRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 

@@ -4,19 +4,19 @@ import io.github.hoooosi.agentplus.application.llm.assembler.ModelAssembler;
 import io.github.hoooosi.agentplus.application.llm.assembler.ProviderAssembler;
 import io.github.hoooosi.agentplus.application.llm.dto.ModelDTO;
 import io.github.hoooosi.agentplus.application.llm.dto.ProviderDTO;
-import io.github.hoooosi.agentplus.domain.llm.enums.ModelType;
-import io.github.hoooosi.agentplus.domain.llm.enums.ProviderType;
+import io.github.hoooosi.agentplus.domain.llm.model.enums.ModelType;
+import io.github.hoooosi.agentplus.domain.llm.model.enums.ProviderType;
 import io.github.hoooosi.agentplus.domain.llm.model.ModelEntity;
 import io.github.hoooosi.agentplus.domain.llm.model.ProviderAggregate;
 import io.github.hoooosi.agentplus.domain.llm.service.LLMDomainService;
 import io.github.hoooosi.agentplus.domain.user.service.UserSettingsDomainService;
-import io.github.hoooosi.agentplus.domain.user.service.model.ProviderEntity;
-import io.github.hoooosi.agentplus.domain.user.service.protocol.ProviderProtocol;
+import io.github.hoooosi.agentplus.domain.llm.model.ProviderEntity;
 import io.github.hoooosi.agentplus.infrastructure.entity.Operator;
-import io.github.hoooosi.agentplus.interfaces.dto.users.llm.request.ModelCreateRequest;
-import io.github.hoooosi.agentplus.interfaces.dto.users.llm.request.ModelUpdateRequest;
-import io.github.hoooosi.agentplus.interfaces.dto.users.llm.request.ProviderCreateRequest;
-import io.github.hoooosi.agentplus.interfaces.dto.users.llm.request.ProviderUpdateRequest;
+import io.github.hoooosi.agentplus.infrastructure.llm.protocol.enums.ProviderProtocol;
+import io.github.hoooosi.agentplus.interfaces.dto.llm.request.ModelCreateRequest;
+import io.github.hoooosi.agentplus.interfaces.dto.llm.request.ModelUpdateRequest;
+import io.github.hoooosi.agentplus.interfaces.dto.llm.request.ProviderCreateRequest;
+import io.github.hoooosi.agentplus.interfaces.dto.llm.request.ProviderUpdateRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -118,6 +118,7 @@ public class LLMAppService {
     /** 获取用户服务商协议
      * @return List<ProviderProtocol> */
     public List<ProviderProtocol> getUserProviderProtocols() {
+
         return llmDomainService.getProviderProtocols();
     }
 
@@ -178,7 +179,7 @@ public class LLMAppService {
     /** 修改服务商状态
      * @param providerId 服务商id
      * @param userId 用户id */
-    public void updateProviderStatus(String providerId, Long userId) {
+    public void updateProviderStatus(Long providerId, Long userId) {
         llmDomainService.updateProviderStatus(providerId, userId);
     }
 

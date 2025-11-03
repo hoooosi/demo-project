@@ -1,6 +1,6 @@
 package io.github.hoooosi.agentplus.domain.llm.repository;
 
-import io.github.hoooosi.agentplus.domain.user.service.model.ProviderEntity;
+import io.github.hoooosi.agentplus.domain.llm.model.ProviderEntity;
 import io.github.hoooosi.agentplus.infrastructure.repository.MyBatisPlusExtRepository;
 import org.apache.ibatis.annotations.Mapper;
 

@@ -1,6 +1,6 @@
 package io.github.hoooosi.agentplus.infrastructure.converter;
 
-import io.github.hoooosi.agentplus.domain.user.service.protocol.ProviderProtocol;
+import io.github.hoooosi.agentplus.domain.user.protocol.ProviderProtocol;
 import org.apache.ibatis.type.BaseTypeHandler;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.MappedJdbcTypes;

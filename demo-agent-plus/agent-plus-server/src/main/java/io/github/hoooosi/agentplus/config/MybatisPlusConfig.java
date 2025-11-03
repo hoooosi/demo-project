@@ -1,0 +1,22 @@
+package io.github.hoooosi.agentplus.config;
+
+import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.reflection.MetaObject;
+import org.springframework.context.annotation.Configuration;
+
+@Slf4j
+@Configuration
+public class MybatisPlusConfig implements MetaObjectHandler {
+
+    @Override
+    public void insertFill(MetaObject metaObject) {
+        this.strictInsertFill(metaObject, "createdAt", Long.class, System.currentTimeMillis());
+        this.strictUpdateFill(metaObject, "updatedAt", Long.class, System.currentTimeMillis());
+    }
+
+    @Override
+    public void updateFill(MetaObject metaObject) {
+        this.strictUpdateFill(metaObject, "updatedAt", Long.class, System.currentTimeMillis());
+    }
+}

@@ -1,6 +1,6 @@
 package io.github.hoooosi.agentplus.infrastructure.converter;
 
-import io.github.hoooosi.agentplus.domain.llm.config.ProviderConfig;
+import io.github.hoooosi.agentplus.domain.llm.model.config.ProviderConfig;
 import io.github.hoooosi.agentplus.infrastructure.utils.JsonUtils;
 import io.github.hoooosi.agentplus.infrastructure.utils.ValidationUtils;
 import org.apache.ibatis.type.BaseTypeHandler;

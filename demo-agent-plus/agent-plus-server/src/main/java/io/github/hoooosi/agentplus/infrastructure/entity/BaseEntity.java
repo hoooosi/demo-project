@@ -10,14 +10,15 @@ import lombok.Getter;
 @Data
 public class BaseEntity {
 
+
     @TableField(fill = FieldFill.INSERT)
-    protected Long createdAt;
+    private Long createdAt;
 
     @TableField(fill = FieldFill.INSERT_UPDATE)
-    protected Long updatedAt;
+    private Long updatedAt;
 
     @TableLogic
-    protected Long deletedAt;
+    private Long deletedAt;
 
     @TableField(exist = false)
     private Operator operatedBy = Operator.USER;

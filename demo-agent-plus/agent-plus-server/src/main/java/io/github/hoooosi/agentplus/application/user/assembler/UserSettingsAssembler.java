@@ -1,7 +1,7 @@
 package io.github.hoooosi.agentplus.application.user.assembler;
 
 import io.github.hoooosi.agentplus.application.user.dto.UserSettingsDTO;
-import io.github.hoooosi.agentplus.domain.user.service.model.UserSettingsEntity;
+import io.github.hoooosi.agentplus.domain.user.model.UserSettingsEntity;
 import io.github.hoooosi.agentplus.interfaces.dto.users.request.UserSettingsUpdateRequest;
 import org.springframework.beans.BeanUtils;
 
